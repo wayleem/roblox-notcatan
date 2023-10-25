@@ -1,6 +1,7 @@
 type DevCard = "knight" | "year_of_plenty" | "monopoly" | "road_building" | "point";
-
 type DevCardMap = { [key in DevCard]?: number };
+
+const devCardKeys: DevCard[] = ["knight", "year_of_plenty", "monopoly", "road_building", "point"];
 
 export default class DevCardHand {
 	devCards: Record<DevCard, number>;
@@ -16,22 +17,22 @@ export default class DevCardHand {
 	}
 
 	removeDevCard(devCards: DevCardMap): void {
-		for (const devCard in devCards) {
-			const count = devCards[devCard as DevCard] || 0;
-			const newCount = (this.devCards[devCard as DevCard] || 0) - count;
+		devCardKeys.forEach((devCard) => {
+			const count = devCards[devCard] || 0;
+			const newCount = (this.devCards[devCard] || 0) - count;
 			if (newCount < 0) {
-				error(`devCard underflow for ${devCard}`);
+				error(`DevCard underflow for ${devCard}`);
 			}
-			this.devCards[devCard as DevCard] = newCount;
-		}
+			this.devCards[devCard] = newCount;
+		});
 	}
 
 	addDevCard(devCards: DevCardMap): void {
-		for (const devCard in devCards) {
-			const count = devCards[devCard as DevCard] || 0;
-			const newCount = (this.devCards[devCard as DevCard] || 0) + count;
-			this.devCards[devCard as DevCard] = newCount;
-		}
+		devCardKeys.forEach((devCard) => {
+			const count = devCards[devCard] || 0;
+			const newCount = (this.devCards[devCard] || 0) + count;
+			this.devCards[devCard] = newCount;
+		});
 	}
 
 	getDevCard(devCard: DevCard): number {
@@ -39,12 +40,9 @@ export default class DevCardHand {
 	}
 
 	hasDevCard(devCards: DevCardMap): boolean {
-		for (const devCard in devCards) {
-			const count = devCards[devCard as DevCard] || 0;
-			if ((this.devCards[devCard as DevCard] || 0) < count) {
-				return false;
-			}
-		}
-		return true;
+		return devCardKeys.every((devCard) => {
+			const count = devCards[devCard] || 0;
+			return (this.devCards[devCard] || 0) >= count;
+		});
 	}
 }

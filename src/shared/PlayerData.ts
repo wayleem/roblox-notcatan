@@ -1,4 +1,4 @@
-import Buildings from "./Building";
+import Buildings from "./Buildings";
 import DevCardHand from "./DevCardHand";
 import ResourceHand from "./ResourceHand";
 import Settings from "./Settings";
