@@ -3,10 +3,9 @@ import Road from "./Road";
 import Settings from "./Settings";
 import Settlement from "./Settlement";
 
-type Building = "road" | "settlement" | "city";
+const buildingKeys = ["road", "settlement", "city"];
+type Building = (typeof buildingKeys)[number];
 type BuildingMap = Partial<Record<Building, number>>;
-
-const buildingKeys: Building[] = ["road", "settlement", "city"];
 
 export default class Buildings {
 	numRoads: number;

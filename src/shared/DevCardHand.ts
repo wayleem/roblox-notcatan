@@ -1,7 +1,6 @@
-type DevCard = "knight" | "year_of_plenty" | "monopoly" | "road_building" | "point";
+const devCardKeys = ["knight", "year_of_plenty", "monopoly", "road_building", "point"];
+type DevCard = (typeof devCardKeys)[number];
 type DevCardMap = { [key in DevCard]?: number };
-
-const devCardKeys: DevCard[] = ["knight", "year_of_plenty", "monopoly", "road_building", "point"];
 
 export default class DevCardHand {
 	devCards: Record<DevCard, number>;

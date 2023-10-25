@@ -1,7 +1,6 @@
-type Resource = "wheat" | "sheep" | "ore" | "wood" | "brick";
+const resourceKeys = ["wheat", "sheep", "ore", "wood", "brick"];
+type Resource = (typeof resourceKeys)[number];
 type ResourceMap = { [key in Resource]?: number };
-
-const resourceKeys: Resource[] = ["wheat", "sheep", "ore", "wood", "brick"];
 
 export default class ResourceHand {
 	resources: Record<Resource, number>;
