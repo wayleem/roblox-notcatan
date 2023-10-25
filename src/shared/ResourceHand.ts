@@ -1,5 +1,7 @@
 type Resource = "wheat" | "sheep" | "ore" | "wood" | "brick";
 
+type ResourceMap = { [key in Resource]?: number };
+
 export default class ResourceHand {
 	resources: Record<Resource, number>;
 
@@ -13,24 +15,36 @@ export default class ResourceHand {
 		};
 	}
 
-	removeResource(resource: Resource, count: number): void {
-		const newCount = this.resources[resource] - count;
-		if (newCount < 0) {
-			error(`Resource underflow for ${resource}`);
+	removeResource(resources: ResourceMap): void {
+		for (const resource in resources) {
+			const count = resources[resource as Resource] || 0;
+			const newCount = (this.resources[resource as Resource] || 0) - count;
+			if (newCount < 0) {
+				error(`Resource underflow for ${resource}`);
+			}
+			this.resources[resource as Resource] = newCount;
 		}
-		this.resources[resource] = newCount;
 	}
 
-	addResource(resource: Resource, count: number): void {
-		const newCount = this.resources[resource] + count;
-		this.resources[resource] = newCount;
+	addResource(resources: ResourceMap): void {
+		for (const resource in resources) {
+			const count = resources[resource as Resource] || 0;
+			const newCount = (this.resources[resource as Resource] || 0) + count;
+			this.resources[resource as Resource] = newCount;
+		}
 	}
 
 	getResource(resource: Resource): number {
-		return this.resources[resource];
+		return this.resources[resource] || 0;
 	}
 
-	hasResource(resource: Resource, count: number): boolean {
-		return this.resources[resource] >= count;
+	hasResource(resources: ResourceMap): boolean {
+		for (const resource in resources) {
+			const count = resources[resource as Resource] || 0;
+			if ((this.resources[resource as Resource] || 0) < count) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

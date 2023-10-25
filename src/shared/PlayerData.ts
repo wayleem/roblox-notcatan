@@ -1,3 +1,4 @@
+import Buildings from "./Building";
 import DevCardHand from "./DevCardHand";
 import ResourceHand from "./ResourceHand";
 import Settings from "./Settings";
@@ -7,10 +8,7 @@ export default class PlayerData {
 
 	resources: ResourceHand;
 	devCards: DevCardHand;
-
-	numRoads: number;
-	numSettlements: number;
-	numCities: number;
+	buildings: Buildings;
 
 	numPlayedKnights: number;
 	numVictoryPoints: number;
@@ -20,11 +18,9 @@ export default class PlayerData {
 		this.teamColor = teamColor;
 
 		this.resources = new ResourceHand();
-    this.devCards = new DevCardHand();
+		this.devCards = new DevCardHand();
+		this.buildings = new Buildings();
 
-		this.numRoads = Settings.INIT_ROADS;
-		this.numSettlements = Settings.INIT_SETTLEMENTS;
-		this.numCities = Settings.INIT_CITIES;
 		this.numPlayedKnights = 0;
 		this.numVictoryPoints = 0;
 	}
@@ -33,39 +29,48 @@ export default class PlayerData {
 		return this.teamColor;
 	}
 
-	getNumRoads(): number {
-		return this.numRoads;
+	// Building
+	canBuildRoad(): boolean {
+		if (this.resources.hasResource({ wood: 1, brick: 1 }) || this.buildings.getBuilding("road") > 0) return true;
+		return false;
 	}
-
-	getNumSettlements(): number {
-		return this.numSettlements;
-	}
-
-	getNumCities(): number {
-		return this.numCities;
-	}
-
 
 	buildRoad(): void {
-    this.resources.removeResource('wood', 1)
-    this.resources.removeResource('brick', 1)
-		this.numRoads--;
+		this.resources.removeResource({ wood: 1, brick: 1 });
+		this.buildings.removeBuilding({ road: 1 });
+	}
+
+	canBuildSettlement(): boolean {
+		if (
+			this.resources.hasResource({ wood: 1, brick: 1, sheep: 1, wheat: 1 }) ||
+			this.buildings.getBuilding("settlement") > 0
+		)
+			return true;
+		return false;
 	}
 
 	buildSettlement(): void {
-		this.removeResource(Resource.WOOD, 1);
-		this.removeResource(Resource.BRICK, 1);
-		this.removeResource(Resource.WHEAT, 1);
-		this.removeResource(Resource.SHEEP, 1);
-    this.numSettlements--;
+		this.resources.removeResource({ wood: 1, brick: 1, sheep: 1, wheat: 1 });
+		this.buildings.removeBuilding({ settlement: 1 });
 	}
 
-  buildCity(): void {
-    this.removeResource(Resource.ORE, 3);
-    this.removeResource(Resource.WHEAT, 2);
-  }
+	canBuildCity(): boolean {
+		if (this.resources.hasResource({ ore: 3, wheat: 2 }) || this.buildings.getBuilding("city") > 0) return true;
+		return false;
+	}
 
-  drawDev(): void {
-    for (const [i, v] of Settings.)
-  }
+	buildCity(): void {
+		this.resources.removeResource({ ore: 3, wheat: 2 });
+		this.buildings.removeBuilding({ city: 1 });
+		this.buildings.addBuilding({ settlement: 1 });
+	}
+
+	canDrawDevCard(): boolean {
+		if (this.resources.hasResource({ ore: 1, sheep: 1, wheat: 1 })) return true;
+		return false;
+	}
+
+	drawDevCard(): void {
+		this.resources.removeResource({ ore: 1, sheep: 1, wheat: 1 });
+	}
 }

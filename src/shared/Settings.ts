@@ -1,5 +1,3 @@
-import Resources from "./Resources";
-
 export default abstract class Settings {
 	// Starting Pieces
 	static INIT_ROADS: number = 15;

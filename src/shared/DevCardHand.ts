@@ -1,5 +1,7 @@
 type DevCard = "knight" | "year_of_plenty" | "monopoly" | "road_building" | "point";
 
+type DevCardMap = { [key in DevCard]?: number };
+
 export default class DevCardHand {
 	devCards: Record<DevCard, number>;
 
@@ -13,24 +15,36 @@ export default class DevCardHand {
 		};
 	}
 
-	removeDevCard(devCard: DevCard, count: number): void {
-		const newCount = this.devCards[devCard] - count;
-		if (newCount < 0) {
-			error(`devCard underflow for ${devCard}`);
+	removeDevCard(devCards: DevCardMap): void {
+		for (const devCard in devCards) {
+			const count = devCards[devCard as DevCard] || 0;
+			const newCount = (this.devCards[devCard as DevCard] || 0) - count;
+			if (newCount < 0) {
+				error(`devCard underflow for ${devCard}`);
+			}
+			this.devCards[devCard as DevCard] = newCount;
 		}
-		this.devCards[devCard] = newCount;
 	}
 
-	adddevCard(devCard: DevCard, count: number): void {
-		const newCount = this.devCards[devCard] + count;
-		this.devCards[devCard] = newCount;
+	addDevCard(devCards: DevCardMap): void {
+		for (const devCard in devCards) {
+			const count = devCards[devCard as DevCard] || 0;
+			const newCount = (this.devCards[devCard as DevCard] || 0) + count;
+			this.devCards[devCard as DevCard] = newCount;
+		}
 	}
 
-	getdevCard(devCard: DevCard): number {
-		return this.devCards[devCard];
+	getDevCard(devCard: DevCard): number {
+		return this.devCards[devCard] || 0;
 	}
 
-	hasdevCard(devCard: DevCard, count: number): boolean {
-		return this.devCards[devCard] >= count;
+	hasDevCard(devCards: DevCardMap): boolean {
+		for (const devCard in devCards) {
+			const count = devCards[devCard as DevCard] || 0;
+			if ((this.devCards[devCard as DevCard] || 0) < count) {
+				return false;
+			}
+		}
+		return true;
 	}
 }
