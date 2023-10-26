@@ -26,7 +26,7 @@ export default class Buildings {
 		this.cities = [];
 	}
 
-	removeBuilding(buildings: BuildingMap): void {
+	useBuilding(buildings: BuildingMap): void {
 		buildingKeys.forEach((building) => {
 			const count = buildings[building] || 0;
 			const newCount = (this[building as keyof this] as number) - count;

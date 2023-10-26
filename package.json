@@ -23,6 +23,7 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
+    "@rbxts/object-utils": "^1.0.4",
     "@rbxts/services": "^1.5.1"
   }
 }

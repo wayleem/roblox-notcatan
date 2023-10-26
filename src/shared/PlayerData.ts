@@ -37,7 +37,7 @@ export default class PlayerData {
 
 	buildRoad(): void {
 		this.resources.removeResource({ wood: 1, brick: 1 });
-		this.buildings.removeBuilding({ road: 1 });
+		this.buildings.useBuilding({ road: 1 });
 	}
 
 	canBuildSettlement(): boolean {
@@ -51,7 +51,7 @@ export default class PlayerData {
 
 	buildSettlement(): void {
 		this.resources.removeResource({ wood: 1, brick: 1, sheep: 1, wheat: 1 });
-		this.buildings.removeBuilding({ settlement: 1 });
+		this.buildings.useBuilding({ settlement: 1 });
 	}
 
 	canBuildCity(): boolean {
@@ -61,7 +61,7 @@ export default class PlayerData {
 
 	buildCity(): void {
 		this.resources.removeResource({ ore: 3, wheat: 2 });
-		this.buildings.removeBuilding({ city: 1 });
+		this.buildings.useBuilding({ city: 1 });
 		this.buildings.addBuilding({ settlement: 1 });
 	}
 

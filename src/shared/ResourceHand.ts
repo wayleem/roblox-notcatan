@@ -1,9 +1,13 @@
-const resourceKeys = ["wheat", "sheep", "ore", "wood", "brick"];
-type Resource = (typeof resourceKeys)[number];
-type ResourceMap = { [key in Resource]?: number };
+type Resource = {
+	wheat: number;
+	sheep: number;
+	ore: number;
+	wood: number;
+	brick: number;
+};
 
 export default class ResourceHand {
-	resources: Record<Resource, number>;
+	resources: Resource;
 
 	constructor() {
 		this.resources = {
@@ -15,27 +19,13 @@ export default class ResourceHand {
 		};
 	}
 
-	removeResource(resources: ResourceMap): void {
-		resourceKeys.forEach((resource) => {
-			const count = resources[resource] || 0;
-			const newCount = (this.resources[resource] || 0) - count;
-			if (newCount < 0) {
-				error(`Resource underflow for ${resource}`);
-			}
-			this.resources[resource] = newCount;
-		});
+	updateResource(key: keyof Resource, count: number): Resource {
+		this.resources[key] += count;
+		return this.resources;
 	}
 
-	addResource(resources: ResourceMap): void {
-		resourceKeys.forEach((resource) => {
-			const count = resources[resource] || 0;
-			const newCount = (this.resources[resource] || 0) + count;
-			this.resources[resource] = newCount;
-		});
-	}
-
-	getResource(resource: Resource): number {
-		return this.resources[resource] || 0;
+	getResource(key: keyof Resource): number {
+		return this.resources[key];
 	}
 
 	hasResource(resources: ResourceMap): boolean {

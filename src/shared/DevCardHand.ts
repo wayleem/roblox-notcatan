@@ -15,7 +15,7 @@ export default class DevCardHand {
 		};
 	}
 
-	removeDevCard(devCards: DevCardMap): void {
+	playDevCard(devCards: DevCardMap): void {
 		devCardKeys.forEach((devCard) => {
 			const count = devCards[devCard] || 0;
 			const newCount = (this.devCards[devCard] || 0) - count;
@@ -26,7 +26,7 @@ export default class DevCardHand {
 		});
 	}
 
-	addDevCard(devCards: DevCardMap): void {
+	drawDevCard(devCards: DevCardMap): void {
 		devCardKeys.forEach((devCard) => {
 			const count = devCards[devCard] || 0;
 			const newCount = (this.devCards[devCard] || 0) + count;
