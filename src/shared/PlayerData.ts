@@ -31,18 +31,18 @@ export default class PlayerData {
 
 	// Building
 	canBuildRoad(): boolean {
-		if (this.resources.hasResource({ wood: 1, brick: 1 }) || this.buildings.getBuilding("road") > 0) return true;
+		if (this.resources.has({ wood: 1, brick: 1 }) || this.buildings.getBuilding("road") > 0) return true;
 		return false;
 	}
 
 	buildRoad(): void {
-		this.resources.removeResource({ wood: 1, brick: 1 });
+		this.resources.deduct({ wood: 1, brick: 1 });
 		this.buildings.useBuilding({ road: 1 });
 	}
 
 	canBuildSettlement(): boolean {
 		if (
-			this.resources.hasResource({ wood: 1, brick: 1, sheep: 1, wheat: 1 }) ||
+			this.resources.has({ wood: 1, brick: 1, sheep: 1, wheat: 1 }) &&
 			this.buildings.getBuilding("settlement") > 0
 		)
 			return true;
@@ -50,27 +50,27 @@ export default class PlayerData {
 	}
 
 	buildSettlement(): void {
-		this.resources.removeResource({ wood: 1, brick: 1, sheep: 1, wheat: 1 });
+		this.resources.deduct({ wood: -1, brick: -1, sheep: -1, wheat: -1 });
 		this.buildings.useBuilding({ settlement: 1 });
 	}
 
 	canBuildCity(): boolean {
-		if (this.resources.hasResource({ ore: 3, wheat: 2 }) || this.buildings.getBuilding("city") > 0) return true;
+		if (this.resources.has({ ore: 3, wheat: 2 }) || this.buildings.getBuilding("city") > 0) return true;
 		return false;
 	}
 
 	buildCity(): void {
-		this.resources.removeResource({ ore: 3, wheat: 2 });
+		this.resources.deduct({ ore: 3, wheat: 2 });
 		this.buildings.useBuilding({ city: 1 });
 		this.buildings.addBuilding({ settlement: 1 });
 	}
 
 	canDrawDevCard(): boolean {
-		if (this.resources.hasResource({ ore: 1, sheep: 1, wheat: 1 })) return true;
+		if (this.resources.has({ ore: 1, sheep: 1, wheat: 1 })) return true;
 		return false;
 	}
 
 	drawDevCard(): void {
-		this.resources.removeResource({ ore: 1, sheep: 1, wheat: 1 });
+		this.resources.deduct({ ore: 1, sheep: 1, wheat: 1 });
 	}
 }

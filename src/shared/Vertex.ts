@@ -22,7 +22,7 @@ export default class Vertex {
 	buildSettlement(player: PlayerData): void {
 		if (this.building === undefined) {
 			this.building = new Settlement(player, this);
-			player.buildings.removeBuilding({ settlement: 1 });
+			//		player.buildings.removeBuilding({ settlement: 1 });
 			player.buildings.settlements.push(this.building as Settlement);
 		}
 	}

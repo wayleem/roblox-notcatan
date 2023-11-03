@@ -1,3 +1,5 @@
+import Object from "@rbxts/object-utils";
+
 type Resource = {
 	wheat: number;
 	sheep: number;
@@ -7,7 +9,7 @@ type Resource = {
 };
 
 export default class ResourceHand {
-	resources: Resource;
+	private resources: Resource;
 
 	constructor() {
 		this.resources = {
@@ -19,19 +21,35 @@ export default class ResourceHand {
 		};
 	}
 
-	updateResource(key: keyof Resource, count: number): Resource {
-		this.resources[key] += count;
+	merge(new_hand: Partial<Resource>): Resource {
+		return Object.assign(this.resources, new_hand);
+	}
+
+	update(key: keyof Resource, count: number): Resource {
+		const new_balance = this.resources[key] + count;
+		if (new_balance < 0) {
+			error(`Resource underflow for ${key}`);
+		}
+		this.resources[key] = new_balance;
 		return this.resources;
 	}
 
-	getResource(key: keyof Resource): number {
+	deduct(new_hand: Partial<Resource>): Resource {
+		const temp = { ...this.resources };
+		(Object.keys(new_hand) as Array<keyof Resource>).forEach((key) => {
+			temp[key] = temp[key] - new_hand[key]!;
+		});
+		return temp;
+	}
+
+	get(key: keyof Resource): number {
 		return this.resources[key];
 	}
 
-	hasResource(resources: ResourceMap): boolean {
-		return resourceKeys.every((resource) => {
-			const count = resources[resource] || 0;
-			return (this.resources[resource] || 0) >= count;
-		});
+	has(req: Partial<Resource>): false | Partial<Resource> {
+		const temp_balance = this.deduct(req);
+		const negative_balance = (Object.keys(temp_balance) as Array<keyof Resource>).some((b) => temp_balance[b] <= 0);
+		if (negative_balance) return false;
+		return temp_balance;
 	}
 }
