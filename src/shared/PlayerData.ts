@@ -1,17 +1,18 @@
 import Buildings from "./Buildings";
 import DevCardHand from "./DevCardHand";
 import ResourceHand from "./ResourceHand";
-import Settings from "./Settings";
 export default class PlayerData {
-	player: Player;
-	teamColor: string;
+	private player: Player;
+	private teamColor: string;
 
-	resources: ResourceHand;
-	devCards: DevCardHand;
-	buildings: Buildings;
+	private resources: ResourceHand;
+	private devCards: DevCardHand;
+	private buildings: Buildings;
 
-	numPlayedKnights: number;
-	numVictoryPoints: number;
+	private numPlayedKnights: number;
+	private numVictoryPoints: number;
+
+	private turn: boolean;
 
 	constructor(player: Player, teamColor: string) {
 		this.player = player;
@@ -23,46 +24,39 @@ export default class PlayerData {
 
 		this.numPlayedKnights = 0;
 		this.numVictoryPoints = 0;
+		this.turn = false;
+	}
+
+	getPlayer(): Player {
+		return this.player;
 	}
 
 	getColor(): string {
 		return this.teamColor;
 	}
 
-	// Building
-	canBuildRoad(): boolean {
-		if (this.resources.has({ wood: 1, brick: 1 }) || this.buildings.getBuilding("road") > 0) return true;
-		return false;
+	getResourceHand(): ResourceHand {
+		return this.resources;
 	}
 
-	buildRoad(): void {
-		this.resources.deduct({ wood: 1, brick: 1 });
-		this.buildings.useBuilding({ road: 1 });
+	getDevCardHand(): DevCardHand {
+		return this.devCards;
 	}
 
-	canBuildSettlement(): boolean {
-		if (
-			this.resources.has({ wood: 1, brick: 1, sheep: 1, wheat: 1 }) &&
-			this.buildings.getBuilding("settlement") > 0
-		)
-			return true;
-		return false;
+	getBuildings(): Buildings {
+		return this.buildings;
 	}
 
-	buildSettlement(): void {
-		this.resources.deduct({ wood: -1, brick: -1, sheep: -1, wheat: -1 });
-		this.buildings.useBuilding({ settlement: 1 });
+	getNumPlayedKnights(): number {
+		return this.numPlayedKnights;
 	}
 
-	canBuildCity(): boolean {
-		if (this.resources.has({ ore: 3, wheat: 2 }) || this.buildings.getBuilding("city") > 0) return true;
-		return false;
+	getNumVictoryPoints(): number {
+		return this.numVictoryPoints;
 	}
 
-	buildCity(): void {
-		this.resources.deduct({ ore: 3, wheat: 2 });
-		this.buildings.useBuilding({ city: 1 });
-		this.buildings.addBuilding({ settlement: 1 });
+	getTurn(): boolean {
+		return this.turn;
 	}
 
 	canDrawDevCard(): boolean {
