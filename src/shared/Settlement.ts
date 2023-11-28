@@ -2,12 +2,16 @@ import PlayerData from "./PlayerData";
 import Vertex from "./Vertex";
 
 export default class Settlement {
-	player: PlayerData;
 	vertex: Vertex;
+	owner: PlayerData | undefined;
 
-	constructor(player: PlayerData, vertex: Vertex) {
-		this.player = player;
+	constructor(vertex: Vertex) {
 		this.vertex = vertex;
+		this.owner = undefined;
+	}
+
+	getVertex(): Vertex {
+		return this.vertex;
 	}
 
 	collectResource(): void {}

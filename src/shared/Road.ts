@@ -1,11 +1,12 @@
-export default class Road {
-	player: Player;
+import Edge from "./Edge";
 
-	constructor(player: Player) {
-		this.player = player;
+export default class Road {
+	edge: Edge;
+	constructor(edge: Edge) {
+		this.edge = edge;
 	}
 
-	getPlayer(): Player {
-		return this.player;
+	getEdge(): Edge {
+		return this.edge;
 	}
 }
