@@ -1,6 +1,6 @@
 import Object from "@rbxts/object-utils";
 
-type Resource = {
+export type Resource = {
 	wheat: number;
 	sheep: number;
 	ore: number;

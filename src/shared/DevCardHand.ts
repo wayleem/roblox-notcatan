@@ -9,7 +9,7 @@ type DevCard = {
 };
 
 export default class DevCardHand {
-	devCards: DevCard;
+	private devCards: DevCard;
 
 	constructor() {
 		this.devCards = {
