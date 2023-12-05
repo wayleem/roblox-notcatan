@@ -1,12 +1,15 @@
-import Edge from "./Edge";
+import Building from "./Building";
 
-export default class Road {
-	edge: Edge;
-	constructor(edge: Edge) {
-		this.edge = edge;
+export default class Road extends Building {
+	constructor(owner: Player, location: Vector3) {
+		super(owner, location);
 	}
 
-	getEdge(): Edge {
-		return this.edge;
+	getType(): string {
+		return "road";
+	}
+
+	build(): Part {
+		return new Instance("Part") as Part;
 	}
 }

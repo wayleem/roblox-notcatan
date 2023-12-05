@@ -1,14 +1,15 @@
-import Settlement from "./Settlement";
-import Vertex from "./Vertex";
+import Building from "./Building";
 
-export default class City {
-	private vertex: Vertex;
-
-	constructor(settlement: Settlement) {
-		this.vertex = settlement.getVertex();
+export default class City extends Building {
+	constructor(owner: Player, location: Vector3) {
+		super(owner, location);
 	}
 
-	getVertex(): Vertex {
-		return this.vertex;
+	getType(): string {
+		return "city";
+	}
+
+	build(): Part {
+		return new Instance("Part") as Part;
 	}
 }

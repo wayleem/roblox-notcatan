@@ -1,18 +1,15 @@
-import PlayerData from "./PlayerData";
-import Vertex from "./Vertex";
+import Building from "./Building";
 
-export default class Settlement {
-	vertex: Vertex;
-	owner: PlayerData | undefined;
-
-	constructor(vertex: Vertex) {
-		this.vertex = vertex;
-		this.owner = undefined;
+export default class Settlement extends Building {
+	constructor(owner: Player, location: Vector3) {
+		super(owner, location);
 	}
 
-	getVertex(): Vertex {
-		return this.vertex;
+	getType(): string {
+		return "settlement";
 	}
 
-	collectResource(): void {}
+	build(): Part {
+		return new Instance("Part") as Part;
+	}
 }
