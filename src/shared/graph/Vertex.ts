@@ -1,15 +1,18 @@
+import City from "../City";
 import Edge from "./Edge";
+import PlayerData from "../player/PlayerData";
+import Settlement from "../Settlement";
 
 export default class Vertex {
 	private position: Vector3;
 	private edges: Edge[];
-	private building: string;
+	private building?: Settlement | City;
 	private part: Part | undefined;
 
 	constructor(position: Vector3) {
 		this.position = position;
 		this.edges = [];
-		this.building = "";
+		this.building = undefined;
 		this.part = undefined;
 	}
 	getPosition(): Vector3 {
@@ -20,7 +23,7 @@ export default class Vertex {
 		return this.edges;
 	}
 
-	getBuilding(): string {
+	getBuilding(): Settlement | City | undefined {
 		return this.building;
 	}
 

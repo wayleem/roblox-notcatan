@@ -1,3 +1,4 @@
+import { Resource } from "shared/types/Resource";
 import Edge from "./Edge";
 import Vertex from "./Vertex";
 
@@ -8,7 +9,7 @@ export class Hex {
 	private vertices: Vertex[];
 	private edges: Edge[];
 	private part: Part | undefined;
-	private resource: string;
+	private resource: Resource | undefined;
 	private token: number | undefined;
 
 	constructor(coord1: number, coord2: number) {
@@ -19,7 +20,7 @@ export class Hex {
 		this.edges = [];
 
 		this.part = undefined;
-		this.resource = "";
+		this.resource = undefined;
 		this.token = undefined;
 	}
 
@@ -43,7 +44,7 @@ export class Hex {
 		return this.part;
 	}
 
-	getResource(): string {
+	getResource(): Resource | undefined {
 		return this.resource;
 	}
 
@@ -59,7 +60,7 @@ export class Hex {
 		this.edges.push(edge);
 	}
 
-	setResource(resource: string) {
+	setResource(resource: Resource) {
 		this.resource = resource;
 	}
 
