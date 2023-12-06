@@ -1,5 +1,5 @@
 import { ServerStorage } from "@rbxts/services";
-import { Board } from "shared/Board";
+import { Board } from "shared/graph/Board";
 import { makeHello } from "shared/module";
 // 1 = 24 vertices and 30 edges
 //
