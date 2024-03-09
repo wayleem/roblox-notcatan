@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "@rbxts/object-utils": "^1.0.4",
-    "@rbxts/services": "^1.5.1"
+    "@rbxts/services": "^1.5.1",
+    "roblox-ts": "^2.3.0"
   }
 }
