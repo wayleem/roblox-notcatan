@@ -42,7 +42,7 @@ export interface Hex {
 }
 
 export interface Building {
-  ownerId: string;
+  ownerId: number;
   part: Part;
 }
 
