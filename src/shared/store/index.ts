@@ -1,10 +1,10 @@
-import { boardReducer } from "./board"
-import { playersReducer } from "./player"
+import { board_reducer } from "./board_store"
+import { players_reducer } from "./player_store"
 import { Store, combineReducers } from "@rbxts/rodux"
 
-const rootReducer = combineReducers({
-  board: boardReducer,
-  players: playersReducer,
+const root_reducer = combineReducers({
+  board: board_reducer,
+  players: players_reducer,
 });
 
-export const store = new Store(rootReducer)
+export const store = new Store(root_reducer)

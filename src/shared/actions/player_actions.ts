@@ -1,19 +1,20 @@
-import { PlayerData } from "shared/store/player";
+import { PlayerData } from "shared/store/player_store";
 import { Resource, DevCard, Road, Settlement, City } from "shared/types";
 
-export type DataPayload = {
-  playerId: string
-  data: Resource | DevCard | Road[] | Settlement[] | City[] | number
+export type DataPayload<T extends Resource | DevCard | Road[] | Settlement[] | City[] | number> = {
+  playerId: number
+  data: T
 }
 
 export type PlayerAction =
-  | { type: 'UPDATE_RESOURCES'; payload: DataPayload }
-  | { type: 'UPDATE_DEVCARDS'; payload: DataPayload }
-  | { type: 'UPDATE_ROADS'; payload: DataPayload }
-  | { type: 'UPDATE_SETTLEMENTS'; payload: DataPayload }
-  | { type: 'UPDATE_CITIES'; payload: DataPayload }
-  | { type: 'UPDATE_NUM_PLAYED_KNIGHTS'; payload: DataPayload }
-  | { type: 'UPDATE_NUM_VICTORY_POINTS'; payload: DataPayload }
+  | { type: 'UPDATE_RESOURCES'; payload: DataPayload<Resource> }
+  | { type: 'UPDATE_DEVCARDS'; payload: DataPayload<DevCard> }
+  | { type: 'UPDATE_ROADS'; payload: DataPayload<Road[]> }
+  | { type: 'UPDATE_SETTLEMENTS'; payload: DataPayload<Settlement[]> }
+  | { type: 'UPDATE_CITIES'; payload: DataPayload<City[]> }
+  | { type: 'UPDATE_NUM_PLAYED_KNIGHTS'; payload: DataPayload<number> }
+  | { type: 'UPDATE_NUM_VICTORY_POINTS'; payload: DataPayload<number> }
+  | { type: 'ADD_PLAYER'; payload: { playerId: number, data: PlayerData } }
 
 /* A more generic approach but might make the reducer harder to read.
  * Would require dispatch to be given a key which makes it less safe.
@@ -25,7 +26,7 @@ function updatePlayerState<T extends keyof PlayerState>(playerId: string, key: T
 }
 */
 
-export function update_resources(playerId: string, resource: Resource) {
+export function update_resources<Resource>(playerId: string, resource: Resource) {
   return {
     type: 'UPDATE_RESOURCES',
     payload: {
@@ -64,6 +65,7 @@ export function update_settlements(playerId: string, settlements: Settlement[]) 
     }
   }
 }
+
 export function update_cities(playerId: string, roads: City[]) {
   return {
     type: 'UPDATE_ROADS',
@@ -73,6 +75,7 @@ export function update_cities(playerId: string, roads: City[]) {
     }
   }
 }
+
 export function update_num_played_knights(playerId: string, knightsPlayed: number) {
   return {
     type: 'UPDATE_ROADS',
@@ -82,12 +85,23 @@ export function update_num_played_knights(playerId: string, knightsPlayed: numbe
     }
   }
 }
+
 export function update_num_victory_points(playerId: string, victoryPoints: number) {
   return {
     type: 'UPDATE_ROADS',
     payload: {
       playerId,
       data: victoryPoints
+    }
+  }
+}
+
+export function add_player(playerId: number, data: PlayerData) {
+  return {
+    type: 'ADD_PLAYER',
+    payload: {
+      playerId,
+      data
     }
   }
 }
