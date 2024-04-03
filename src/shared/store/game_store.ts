@@ -1,9 +1,7 @@
-import { DataPayload, PlayerAction } from "shared/actions/player_actions";
+import { DataPayload, GameAction } from "shared/actions/game_actions";
 import { DevCard, Resource, Road, Settlement, City, Edge } from "shared/types";
-import { update_edge, update_vertex } from "shared/actions/board_actions";
 
 export interface PlayerData {
-	player: Player;
 	teamColor: string;
 
 	resources: Resource;
@@ -17,7 +15,7 @@ export interface PlayerData {
 	numVictoryPoints: number;
 }
 
-export interface PlayersState {
+export interface GameState {
 	largestArmy: [number, number | undefined];
 	longestRoad: [number, number | undefined];
 	players: {
@@ -25,13 +23,38 @@ export interface PlayersState {
 	};
 }
 
-const initPlayers: PlayersState = {
+const initGame: GameState = {
 	largestArmy: [3, undefined],
 	longestRoad: [5, undefined],
-	players: {},
+	players: {
+		/* test player
+		[123]: {
+			teamColor: "green",
+
+			resources: {
+				wood: 0,
+				wheat: 0,
+				ore: 0,
+				brick: 0,
+				sheep: 0,
+			},
+			devCards: {
+				knight: 0,
+				monopoly: 0,
+				year_of_plenty: 0,
+				road_building: 0,
+				point: 0,
+			},
+			roads: [],
+			settlements: [],
+			cities: [],
+			numPlayedKnights: 0,
+			numVictoryPoints: 0,
+		},*/
+	},
 };
 
-export function players_reducer(state: PlayersState = initPlayers, action: PlayerAction): PlayersState {
+export function game_reducer(state: GameState = initGame, action: GameAction): GameState {
 	switch (action.type) {
 		case "UPDATE_RESOURCES":
 			return update_resources(state, action.payload);
@@ -58,7 +81,7 @@ export function players_reducer(state: PlayersState = initPlayers, action: Playe
 	}
 }
 
-function update_resources(state: PlayersState, payload: DataPayload<Resource>): PlayersState {
+function update_resources(state: GameState, payload: DataPayload<Resource>): GameState {
 	const { playerId, data } = payload;
 	const playerState = state.players[playerId];
 	if (!playerState) {
@@ -76,14 +99,16 @@ function update_resources(state: PlayersState, payload: DataPayload<Resource>): 
 
 	return {
 		...state,
-		[playerId]: {
-			...playerState,
-			resources: updatedResources,
+		players: {
+			[playerId]: {
+				...playerState,
+				resources: updatedResources,
+			},
 		},
 	};
 }
 
-function update_devcards(state: PlayersState, payload: DataPayload<DevCard>): PlayersState {
+function update_devcards(state: GameState, payload: DataPayload<DevCard>): GameState {
 	const { playerId, data } = payload;
 	const playerState = state.players[playerId];
 	if (!playerState) {
@@ -101,13 +126,16 @@ function update_devcards(state: PlayersState, payload: DataPayload<DevCard>): Pl
 
 	return {
 		...state,
-		[playerId]: {
-			...playerState,
-			devCards: updatedDevCards,
+		players: {
+			[playerId]: {
+				...playerState,
+				devCards: updatedDevCards,
+			},
 		},
 	};
 }
 
+// need to test this
 function calculate_longest_road(playerRoads: Road[]): number {
 	// A map to keep track of each edge's connected edges based on player's roads
 	const edgeConnections = new Map<Edge, Edge[]>();
@@ -149,7 +177,7 @@ function calculate_longest_road(playerRoads: Road[]): number {
 	return maxRoadLength;
 }
 
-function add_road(state: PlayersState, payload: DataPayload<Road>): PlayersState {
+function add_road(state: GameState, payload: DataPayload<Road>): GameState {
 	const { playerId, data: road } = payload;
 	const player = state.players[playerId];
 	if (!player) return state; // Early exit if player not found
@@ -183,7 +211,7 @@ function add_road(state: PlayersState, payload: DataPayload<Road>): PlayersState
 }
 
 // Add Settlement to a player's data
-function add_settlement(state: PlayersState, payload: DataPayload<Settlement>): PlayersState {
+function add_settlement(state: GameState, payload: DataPayload<Settlement>): GameState {
 	const { playerId, data: settlement } = payload;
 	if (!state.players[playerId]) return state; // Early exit if player not found
 
@@ -191,9 +219,11 @@ function add_settlement(state: PlayersState, payload: DataPayload<Settlement>): 
 
 	return {
 		...state,
-		[playerId]: {
-			...state.players[playerId],
-			settlements: [...state.players[playerId].settlements, settlement],
+		players: {
+			[playerId]: {
+				...state.players[playerId],
+				settlements: [...state.players[playerId].settlements, settlement],
+			},
 		},
 	};
 }
@@ -201,22 +231,24 @@ function add_settlement(state: PlayersState, payload: DataPayload<Settlement>): 
 // Function to remove a settlement
 // Note: This implementation depends on how you identify settlements uniquely.
 // For example, if each settlement has an ID, you would filter by that ID.
-function remove_settlement(state: PlayersState, payload: DataPayload<Settlement>): PlayersState {
+function remove_settlement(state: GameState, payload: DataPayload<Settlement>): GameState {
 	const { playerId, data: settlementToRemove } = payload;
 	const player = state.players[playerId];
 	if (!player) return state;
 
 	return {
 		...state,
-		[playerId]: {
-			...player,
-			settlements: player.settlements.filter((settlement) => settlement !== settlementToRemove),
+		players: {
+			[playerId]: {
+				...player,
+				settlements: player.settlements.filter((settlement) => settlement !== settlementToRemove),
+			},
 		},
 	};
 }
 
 // Add City to a player's data
-function add_city(state: PlayersState, payload: DataPayload<City>): PlayersState {
+function add_city(state: GameState, payload: DataPayload<City>): GameState {
 	const { playerId, data: city } = payload;
 	if (!state.players[playerId]) return state; // Early exit if player not found
 
@@ -224,15 +256,17 @@ function add_city(state: PlayersState, payload: DataPayload<City>): PlayersState
 
 	return {
 		...state,
-		[playerId]: {
-			...state.players[playerId],
-			cities: [...state.players[playerId].cities, city],
+		players: {
+			[playerId]: {
+				...state.players[playerId],
+				cities: [...state.players[playerId].cities, city],
+			},
 		},
 	};
 }
 
 // Increment the number of played knights for a player
-function increment_played_knights(state: PlayersState, payload: DataPayload<number>): PlayersState {
+function increment_played_knights(state: GameState, payload: DataPayload<number>): GameState {
 	const { playerId, data: count } = payload;
 	const player = state.players[playerId];
 	if (!player) return state;
@@ -257,33 +291,39 @@ function increment_played_knights(state: PlayersState, payload: DataPayload<numb
 }
 
 // Update a player's victory points
-function update_victory_points(state: PlayersState, payload: DataPayload<number>): PlayersState {
+function update_victory_points(state: GameState, payload: DataPayload<number>): GameState {
 	const { playerId, data: points } = payload;
 	const player = state.players[playerId];
 	if (!player) return state;
 
 	return {
 		...state,
-		[playerId]: {
-			...player,
-			numVictoryPoints: player.numVictoryPoints + points,
+		players: {
+			[playerId]: {
+				...player,
+				numVictoryPoints: player.numVictoryPoints + points,
+			},
 		},
 	};
 }
 
 // Add a new player to the state
-function add_player(state: PlayersState, payload: PlayerData): PlayersState {
-	const playerId = payload.player.UserId;
+function add_player(state: GameState, payload: DataPayload<PlayerData>): GameState {
+	const { playerId, data: playerData } = payload;
+	print("adding:", playerId);
 
 	return {
 		...state,
-		[playerId]: payload,
+		players: {
+			...state.players,
+			[playerId]: playerData,
+		},
 	};
 }
 
 // Remove a player from the state
-function remove_player(state: PlayersState, payload: DataPayload<number>): PlayersState {
-	const { playerId } = payload;
+function remove_player(state: GameState, payload: number): GameState {
+	const playerId = payload;
 	const newState = { ...state };
 	delete newState.players[playerId];
 
