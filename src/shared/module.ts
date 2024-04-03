@@ -1,7 +1,20 @@
 import { Edge, Vertex } from "./types";
 
-export function serializeVector3(vector: Vector3): string {
-  return `${vector.X}:${vector.Y}:${vector.Z}`;
+export function serialize_vertex(vector: Vector3): string {
+  return `vertex:${vector.X}:${vector.Y}:${vector.Z}`;
+}
+
+export function serialize_hex(vector: Vector3): string {
+  return `hex:${vector.X}:${vector.Y}:${vector.Z}`;
+}
+
+export function serialize_edge(cframe: CFrame): string {
+  const pos = cframe.Position;
+  const x = tostring(math.round(pos.X * 100) / 100);
+  const y = tostring(math.round(pos.Y * 100) / 100);
+  const z = tostring(math.round(pos.Z * 100) / 100);
+
+  return `edge:(${x},${y},${z})`;
 }
 
 export function is_edge(obj: Edge | Vertex): obj is Edge {

@@ -1,7 +1,7 @@
 import { PlayerData } from "shared/store/player_store";
 import { Resource, DevCard, Road, Settlement, City } from "shared/types";
 
-export type DataPayload<T extends Resource | DevCard | Road[] | Settlement[] | City[] | number> = {
+export type DataPayload<T extends Resource | DevCard | Road | Settlement | City | number> = {
   playerId: number
   data: T
 }
@@ -9,99 +9,82 @@ export type DataPayload<T extends Resource | DevCard | Road[] | Settlement[] | C
 export type PlayerAction =
   | { type: 'UPDATE_RESOURCES'; payload: DataPayload<Resource> }
   | { type: 'UPDATE_DEVCARDS'; payload: DataPayload<DevCard> }
-  | { type: 'UPDATE_ROADS'; payload: DataPayload<Road[]> }
-  | { type: 'UPDATE_SETTLEMENTS'; payload: DataPayload<Settlement[]> }
-  | { type: 'UPDATE_CITIES'; payload: DataPayload<City[]> }
-  | { type: 'UPDATE_NUM_PLAYED_KNIGHTS'; payload: DataPayload<number> }
-  | { type: 'UPDATE_NUM_VICTORY_POINTS'; payload: DataPayload<number> }
-  | { type: 'ADD_PLAYER'; payload: { playerId: number, data: PlayerData } }
+  | { type: 'ADD_ROAD'; payload: DataPayload<Road> }
+  | { type: 'ADD_SETTLEMENT'; payload: DataPayload<Settlement> }
+  | { type: 'REMOVE_SETTLEMENT'; payload: DataPayload<Settlement> }
+  | { type: 'ADD_CITY'; payload: DataPayload<City> }
+  | { type: 'INCREMENT_PLAYED_KNIGHTS'; payload: DataPayload<number> }
+  | { type: 'UPDATE_VICTORY_POINTS'; payload: DataPayload<number> }
+  | { type: 'ADD_PLAYER'; payload: PlayerData }
+  | { type: 'REMOVE_PLAYER'; payload: DataPayload<number> };
 
-/* A more generic approach but might make the reducer harder to read.
- * Would require dispatch to be given a key which makes it less safe.
-function updatePlayerState<T extends keyof PlayerState>(playerId: string, key: T, value: PlayerState[T]) {
-    return {
-        type: 'UPDATE_PLAYER_STATE',
-        payload: { playerId, key, value },
-    };
-}
-*/
 
-export function update_resources<Resource>(playerId: string, resource: Resource) {
+export function update_resources(playerId: number, resources: Resource): PlayerAction {
   return {
     type: 'UPDATE_RESOURCES',
-    payload: {
-      playerId,
-      data: resource,
-    }
-  }
+    payload: { playerId, data: resources }
+  };
 }
 
-export function update_devcards(playerId: string, devCard: DevCard) {
+export function update_dev_cards(playerId: number, devCard: DevCard): PlayerAction {
   return {
     type: 'UPDATE_DEVCARDS',
-    payload: {
-      playerId,
-      data: devCard,
-    }
-  }
+    payload: { playerId, data: devCard }
+  };
 }
 
-export function update_roads(playerId: string, roads: Road[]) {
+export function add_road(playerId: number, road: Road): PlayerAction {
   return {
-    type: 'UPDATE_ROADS',
-    payload: {
-      playerId,
-      data: roads
-    }
-  }
+    type: 'ADD_ROAD',
+    payload: { playerId, data: road }
+  };
 }
 
-export function update_settlements(playerId: string, settlements: Settlement[]) {
+export function add_settlement(playerId: number, settlement: Settlement): PlayerAction {
   return {
-    type: 'UPDATE_ROADS',
-    payload: {
-      playerId,
-      data: settlements
-    }
-  }
+    type: 'ADD_SETTLEMENT',
+    payload: { playerId, data: settlement }
+  };
 }
 
-export function update_cities(playerId: string, roads: City[]) {
+export function remove_settlement(playerId: number, settlement: Settlement): PlayerAction {
   return {
-    type: 'UPDATE_ROADS',
-    payload: {
-      playerId,
-      data: roads
-    }
-  }
+    type: 'REMOVE_SETTLEMENT',
+    payload: { playerId, data: settlement }
+  };
 }
 
-export function update_num_played_knights(playerId: string, knightsPlayed: number) {
+export function add_city(playerId: number, city: City): PlayerAction {
   return {
-    type: 'UPDATE_ROADS',
-    payload: {
-      playerId,
-      data: knightsPlayed
-    }
-  }
+    type: 'ADD_CITY',
+    payload: { playerId, data: city }
+  };
 }
 
-export function update_num_victory_points(playerId: string, victoryPoints: number) {
+export function increment_played_knights(playerId: number, count: number): PlayerAction {
   return {
-    type: 'UPDATE_ROADS',
-    payload: {
-      playerId,
-      data: victoryPoints
-    }
-  }
+    type: 'INCREMENT_PLAYED_KNIGHTS',
+    payload: { playerId, data: count }
+  };
 }
 
-export function add_player(playerId: number, data: PlayerData) {
+export function update_victory_points(playerId: number, points: number): PlayerAction {
+  return {
+    type: 'UPDATE_VICTORY_POINTS',
+    payload: { playerId, data: points }
+  };
+}
+
+export function add_player(playerData: PlayerData): PlayerAction {
   return {
     type: 'ADD_PLAYER',
-    payload: {
-      playerId,
-      data
-    }
-  }
+    payload: playerData
+  };
+}
+
+export function remove_player(playerId: number): PlayerAction {
+  return {
+    type: 'REMOVE_PLAYER',
+    payload: { playerId, data: playerId }
+  };
 }

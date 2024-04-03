@@ -5,31 +5,32 @@ import { Edge, Vertex } from "shared/types";
 
 
 
-export default function build_mode(status: boolean) {
-  const localPlayer = Players.LocalPlayer
-  const board = store.getState().board
-  const vertices = board.vertices
-  const edges = board.edges
+export default function build_mode(input: InputObject) {
+  if (input.KeyCode.Name === "B") {
+    const localPlayer = Players.LocalPlayer
+    const board = store.getState().board
+    const vertices = board.vertices
+    const edges = board.edges
 
-  const [openVertices, openEdges] = get_buildable(localPlayer.UserId, { vertices, edges })
+    const [openVertices, openEdges] = get_buildable(localPlayer.UserId, { vertices, edges })
 
-  openVertices.forEach((v) => {
-    const part = v.part
-    const highlight = part.FindFirstChildWhichIsA("Highlight")
-    if (highlight)
-      highlight.Enabled = status
-    else error("Highlight not found on vertex " + vector_to_string(part.Position))
-  })
+    openVertices.forEach((v) => {
+      const part = v.part
+      const highlight = part.FindFirstChildWhichIsA("Highlight")
+      if (highlight)
+        highlight.Enabled = !highlight.Enabled
+      else error("Highlight not found on vertex " + vector_to_string(part.Position))
+    })
 
-  openEdges.forEach((e) => {
-    const part = e.part
-    const highlight = part.FindFirstChildWhichIsA("Highlight")
-    if (highlight)
-      highlight.Enabled = status
-    else error("Highlight not found on edge " + vector_to_string(part.Position))
-  })
+    openEdges.forEach((e) => {
+      const part = e.part
+      const highlight = part.FindFirstChildWhichIsA("Highlight")
+      if (highlight)
+        highlight.Enabled = !highlight.Enabled
+      else error("Highlight not found on edge " + vector_to_string(part.Position))
+    })
+  }
 }
-
 /*
  *           for each edge/vertex
  *           
@@ -92,14 +93,15 @@ function is_buildable_vertex(vertex: Vertex, vertices: Vertex[], edges: Edge[]):
 
 function is_buildable_edge(edge: Edge, playerId: number, edges: Edge[]): boolean {
   // Check if the edge already has a road owned by the player
-  if (edge.road && edge.road.ownerId === playerId) {
-    return true;
+  if (edge.road) {
+    return false;
   }
 
   // Check if any of the edge's vertices are connected to a road owned by the player
   return edge.vertices.some(vec =>
     edges.some(
       e =>
+        e !== edge &&
         e.road &&
         e.road.ownerId === playerId &&
         e.vertices.some(v => is_vector3_equal(v, vec))

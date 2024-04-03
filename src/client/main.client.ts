@@ -1,6 +1,8 @@
 import { makeHello } from "shared/module";
-import { Players } from "@rbxts/services";
+import { Players, UserInputService } from "@rbxts/services";
+import build_mode from "./controllers/build_mode";
 
+UserInputService.InputBegan.Connect((build_mode))
 
 /*
  * Find a way to give both client and server access to the same Game Instance so

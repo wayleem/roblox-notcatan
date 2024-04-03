@@ -1,6 +1,5 @@
 import { BoardAction, BuildPayload } from "shared/actions/board_actions";
-import { Vertex, Edge, Hex, Road, Settlement, City } from "../types";
-import { is_edge, is_vertex } from "shared/module";
+import { Vertex, Edge, Hex, Road, Settlement, City, Resource } from "../types";
 
 interface BoardState {
   vertices: Vertex[];
@@ -31,39 +30,40 @@ export function board_reducer(state: BoardState = initBoard, action: BoardAction
         ...state,
         hexes: [...state.hexes, action.payload],
       };
-    case "BUILD":
-      return build(state, action.payload as BuildPayload);
+    case "UPDATE_VERTEX":
+      const updatedVertices = state.vertices.map(vertex => {
+        if (vertex === action.payload.node) {
+          return { ...vertex, building: action.payload.building };
+        }
+        return vertex;
+      });
+      return {
+        ...state,
+        vertices: updatedVertices,
+      };
+    case "UPDATE_EDGE":
+      const updatedEdges = state.edges.map(edge => {
+        if (edge === action.payload.node) {
+          return { ...edge, road: action.payload.building };
+        }
+        return edge;
+      });
+      return {
+        ...state,
+        edges: updatedEdges,
+      };
+    case "UPDATE_HEX":
+      const updatedHexes = state.hexes.map(hex => {
+        if (hex === action.payload.hex) {
+          return { ...hex, resource: action.payload.resource };
+        }
+        return hex;
+      });
+      return {
+        ...state,
+        hexes: updatedHexes,
+      };
     default:
       return state;
   }
-}
-
-function build(state: BoardState, payload: BuildPayload) {
-  if (is_edge(payload.node)) {
-    return build_for_edge(state, payload);
-  }
-  if (is_vertex(payload.node)) {
-    return build_for_vertex(state, payload);
-  }
-  return state;
-}
-
-function build_for_edge(state: BoardState, payload: BuildPayload) {
-  const edgeRef = state.edges.find((e) => e === payload.node);
-  if (edgeRef) {
-    const updatedEdges = state.edges.map((e) => (e === edgeRef ? { ...e, road: payload.building as Road } : e));
-    return { ...state, edges: updatedEdges };
-  }
-  return state;
-}
-
-function build_for_vertex(state: BoardState, payload: BuildPayload) {
-  const vertexRef = state.vertices.find((v) => v === payload.node);
-  if (vertexRef) {
-    const updatedVertices = state.vertices.map((v) =>
-      v === vertexRef ? { ...v, building: payload.building as Settlement | City } : v,
-    );
-    return { ...state, vertices: updatedVertices };
-  }
-  return state;
 }

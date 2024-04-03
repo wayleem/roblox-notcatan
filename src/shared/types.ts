@@ -19,29 +19,31 @@ export type Resource = {
  * Edges has vertices because an edge cannot exist without two vertices.
  * Vertex does not have edge reference because it is not dependent on it.
  */
-export interface Vertex {
+export interface Node {
+  id: string;
+  part: Part
+}
+export interface Vertex extends Node {
   position: Vector3;
-  part: Part;
   building?: Settlement | City; // Optional building
 }
 
-export interface Edge {
+export interface Edge extends Node {
   cframe: CFrame
   vertices: [Vector3, Vector3];
-  part: Part;
   road?: Road; // Optional road
 }
 
-export interface Hex {
+export interface Hex extends Node {
   position: Vector3; // Center position
   vertices: Vertex[];
   edges: Edge[];
-  part: Part;
-  resource?: Resource;
+  resource: Resource;
   token?: number;
 }
 
 export interface Building {
+  id: string;
   ownerId: number;
   part: Part;
 }
