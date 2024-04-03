@@ -7,13 +7,17 @@ import { Vertex } from "shared/types";
 generate_board(2, 10)
 
 const board = store.getState().board;
-const vertices: Vertex[] = board.vertices
 
+board.vertices.forEach((v) => {
+  print(v.id)
+})
 
+board.edges.forEach((e) => {
+  print(e.id)
+})
 
-vertices.forEach((v) => {
-  const vertexPart = v.part
-
+board.hexes.forEach((h) => {
+  print(h.id)
 })
 
 const remoteEvent = new Instance("RemoteEvent") as RemoteEvent;
