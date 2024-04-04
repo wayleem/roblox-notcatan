@@ -1,4 +1,4 @@
-import { PlayerData } from "shared/store/game_store";
+import { PlayerData } from "shared/types";
 import { Resource, DevCard, Road, Settlement, City } from "shared/types";
 
 export type DataPayload<T extends Resource | DevCard | Road | Settlement | City | number | PlayerData> = {

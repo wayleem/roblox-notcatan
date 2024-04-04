@@ -1,21 +1,9 @@
 import { DataPayload, GameAction } from "shared/actions/game_actions";
-import { DevCard, Resource, Road, Settlement, City, Edge } from "shared/types";
-
-export interface PlayerData {
-	teamColor: string;
-
-	resources: Resource;
-	devCards: DevCard;
-
-	roads: Road[];
-	settlements: Settlement[];
-	cities: City[];
-
-	numPlayedKnights: number;
-	numVictoryPoints: number;
-}
+import { DevCard, Resource, Road, Settlement, City, Edge, PlayerData } from "shared/types";
 
 export interface GameState {
+	turn: number;
+	round: number;
 	largestArmy: [number, number | undefined];
 	longestRoad: [number, number | undefined];
 	players: {
@@ -24,6 +12,8 @@ export interface GameState {
 }
 
 const initGame: GameState = {
+	turn: 0,
+	round: 1,
 	largestArmy: [3, undefined],
 	longestRoad: [5, undefined],
 	players: {

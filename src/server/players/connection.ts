@@ -1,7 +1,7 @@
 import { Players } from "@rbxts/services";
 import { add_player, remove_player } from "shared/actions/game_actions";
 import { store } from "shared/store";
-import { PlayerData } from "shared/store/game_store";
+import { PlayerData } from "shared/types";
 
 export function on_player_join(player: Player) {
 	const initPlayer: PlayerData = {
