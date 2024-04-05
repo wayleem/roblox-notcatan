@@ -1,9 +1,8 @@
 import { ServerStorage } from "@rbxts/services";
-import { Vertex, Edge, Hex } from "shared/types";
-import { store } from "shared/store";
-import { add_edge, add_hex, add_vertex } from "shared/actions/board_actions";
-import { is_vector3_equal, serialize_vertex, serialize_edge, serialize_hex } from "shared/module";
-
+import { ArrayT, Vertex, Edge, Hex } from "shared/types";
+import { create } from "shared/actions";
+import { store } from "server/store";
+import { someT, is_vector3_equal, serialize_vertex, serialize_edge, serialize_hex } from "shared/utils";
 
 const PART_THICKNESS: number = 1; // Thickness of the hexagon edges
 const VERTEX_SIZE: number = 2; // Size of the hexagon vertices static RADIUS: number = 2; // Size of the game board
@@ -20,8 +19,8 @@ export default function generate_board(radius: number, tileSize: number): void {
 
 function create_hexagon(q: number, r: number, radius: number): void {
   const board = store.getState().board;
-  const vertices: Vertex[] = board.vertices;
-  const edges: Edge[] = board.edges;
+  const vertices: ArrayT<Vertex> = board.vertices;
+  const edges: ArrayT<Edge> = board.edges;
 
   const center = hex_to_world(q, r, radius);
   const hexEdges: Edge[] = [];
@@ -46,27 +45,25 @@ function create_hexagon(q: number, r: number, radius: number): void {
     const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
 
     // Create edge from calculated cframe.
-    if (!edges.some((e) => is_vector3_equal(e.cframe.Position, edgeCFrame.Position))) {
+    if (!someT(edges, (e) => is_vector3_equal(e.cframe.Position, edgeCFrame.Position))) {
       const edgePart = create_edge_part(edgeCFrame, vertexVector, nextVertexVector);
       const edge: Edge = {
-        id: serialize_edge(edgeCFrame),
         cframe: edgeCFrame,
         vertices: [vertexVector, nextVertexVector],
         part: edgePart,
       };
       hexEdges.push(edge);
-      store.dispatch(add_edge(edge));
+      store.dispatch(create(serialize_edge(edgeCFrame), edge))
     }
     // Create vertex from vertex position.
-    if (!vertices.some((v) => is_vector3_equal(v.position, vertexVector))) {
+    if (!someT(vertices, (v) => is_vector3_equal(v.position, vertexVector))) {
       const vertexPart = create_vertex_part(vertexVector);
       const vertex: Vertex = {
-        id: serialize_vertex(vertexVector),
         position: vertexVector,
         part: vertexPart,
       };
       hexVertices.push(vertex);
-      store.dispatch(add_vertex(vertex));
+      store.dispatch(create(serialize_vertex(vertexVector), vertex));
     }
   }
   const hexPart = ServerStorage.WaitForChild("Tile").Clone() as Part;
@@ -74,7 +71,6 @@ function create_hexagon(q: number, r: number, radius: number): void {
   hexPart.Position = center;
 
   const hex: Hex = {
-    id: serialize_hex(center),
     position: center,
     vertices: hexVertices,
     edges: hexEdges,
@@ -87,7 +83,7 @@ function create_hexagon(q: number, r: number, radius: number): void {
       brick: 0,
     }
   };
-  store.dispatch(add_hex(hex));
+  store.dispatch(create(serialize_hex(center), hex));
 }
 
 function hex_to_world(q: number, r: number, tileSize: number): Vector3 {

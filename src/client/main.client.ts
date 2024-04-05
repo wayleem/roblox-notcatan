@@ -1,17 +1,19 @@
-import { makeHello } from "shared/module";
+import { makeHello } from "shared/utils";
 import { Players, UserInputService } from "@rbxts/services";
 import build_mode from "./controllers/build_mode";
-import { store } from "shared/store";
+import { store } from "client/store";
 import { add_road } from "shared/actions/game_actions";
+import Object from "@rbxts/object-utils";
 
 UserInputService.InputBegan.Connect(build_mode);
 const board = store.getState().board;
 
 print("contents of board: ", board);
 
-board.vertices.forEach((v) => {
-	print(v.id);
-});
+/*
+Object.keys(board.vertices)
+Object.values(board.vertices)
+*/
 
 /*
  * Find a way to give both client and server access to the same Game Instance so
