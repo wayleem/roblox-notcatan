@@ -11,11 +11,10 @@ const global_store = store.getState();
 
 print(global_store.board);
 
-/*
 const board = global_store.board;
 const players = global_store.players;
 
-print(players);
+print("players:" + players);
 Players.PlayerAdded.Connect((player) => {
 	print("player joined:", player.Name);
 	on_player_join(player);
@@ -36,6 +35,5 @@ Players.PlayerRemoving.Connect((player) => {
 });
 
 const remoteEvent = new Instance("RemoteEvent") as RemoteEvent;
-*/
 
 print(makeHello("main.server.ts"));
