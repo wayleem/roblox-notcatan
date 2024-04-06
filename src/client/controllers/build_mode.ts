@@ -4,7 +4,7 @@ import { is_vector3_equal, vector_to_string } from "shared/utils";
 import { Edge, Vertex } from "shared/types";
 
 export default function build_mode(input: InputObject) {
-  /*
+	/*
   if (input.KeyCode.Name === "B") {
     print("entered build mode");
     const localPlayer = Players.LocalPlayer;

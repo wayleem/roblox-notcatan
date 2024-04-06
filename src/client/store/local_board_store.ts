@@ -1,1 +1,1 @@
-export function local_board_reducer() { }
+export function local_board_reducer() {}

@@ -1,63 +1,62 @@
 // new data
-type Action_Create<T> = { id: string; data: T; type: "CREATE" }
+type Action_Create<T> = { id: string; data: T; type: "CREATE"; target: string };
 // big data swap
-type Action_Merge<T> = { id: string; data: Partial<T>; type: "MERGE" }
-// change one key 
+type Action_Merge<T> = { id: string; data: Partial<T>; type: "MERGE"; target: string };
+// change one key
 type Action_Update<T> = {
-  id: string
-  key: keyof T
-  value: unknown
-  type: "UPDATE_KEY"
-}
+	id: string;
+	key: keyof T;
+	value: unknown;
+	type: "UPDATE_KEY";
+	target: string;
+};
 // delete
-type Action_Del = { id: string; type: "DEL" }
+type Action_Del = { id: string; type: "DEL"; target: string };
 // force update clients
-type Action_Flush = { id: string; type: "PING" }
+type Action_Flush = { id: string; type: "PING"; target: string };
 
-export type MyActions<T> =
-  | Action_Create<T>
-  | Action_Merge<T>
-  | Action_Update<T>
-  | Action_Del
-  | Action_Flush
+export type MyActions<T> = Action_Create<T> | Action_Merge<T> | Action_Update<T> | Action_Del | Action_Flush;
 
-export function create<T>(id: string, data: T): Action_Create<T> {
-  return {
-    type: "CREATE",
-    id,
-    data
-  }
+export function create<T>(id: string, data: T, target: string): Action_Create<T> {
+	return {
+		type: "CREATE",
+		id,
+		data,
+		target,
+	};
 }
 
-export function merge<T>(id: string, data: Partial<T>): Action_Merge<T> {
-  return {
-    type: "MERGE",
-    id,
-    data
-  }
+export function merge<T>(id: string, data: Partial<T>, target: string): Action_Merge<T> {
+	return {
+		type: "MERGE",
+		id,
+		data,
+		target,
+	};
 }
 
-export function update<T>(id: string, key: keyof T, value: unknown): Action_Update<T> {
-  return {
-    type: "UPDATE_KEY",
-    id,
-    key,
-    value
-  }
+export function update<T>(id: string, key: keyof T, value: unknown, target: string): Action_Update<T> {
+	return {
+		type: "UPDATE_KEY",
+		id,
+		key,
+		value,
+		target,
+	};
 }
 
-export function del(id: string): Action_Del {
-  return {
-    type: "DEL",
-    id
-  }
+export function del(id: string, target: string): Action_Del {
+	return {
+		type: "DEL",
+		id,
+		target,
+	};
 }
 
-export function flush(id: string): Action_Flush {
-  return {
-    type: "PING",
-    id
-  }
+export function flush(id: string, target: string): Action_Flush {
+	return {
+		type: "PING",
+		id,
+		target,
+	};
 }
-
-

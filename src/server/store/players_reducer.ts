@@ -3,67 +3,67 @@ import { MyActions } from "shared/actions";
 import { DevCard, Resource, Road, Settlement, City, Edge, ArrayT } from "shared/types";
 
 export interface PlayerState {
-  teamColor: string;
+	teamColor: string;
 
-  resources: Resource;
-  devCards: DevCard;
+	resources: Resource;
+	devCards: DevCard;
 
-  roads: Road[];
-  settlements: Settlement[];
-  cities: City[];
+	roads: Road[];
+	settlements: Settlement[];
+	cities: City[];
 
-  numPlayedKnights: number;
-  numVictoryPoints: number;
+	numPlayedKnights: number;
+	numVictoryPoints: number;
 }
 
 export interface GameState {
-  turn: number;
-  round: number;
-  largestArmy: [number, number | undefined];
-  longestRoad: [number, number | undefined];
-  players: ArrayT<PlayerState>;
+	turn: number;
+	round: number;
+	largestArmy: [number, number | undefined];
+	longestRoad: [number, number | undefined];
+	players: ArrayT<PlayerState>;
 }
 
 export function players_reducer(state: ArrayT<PlayerState> = {}, action: MyActions<PlayerState>): ArrayT<PlayerState> {
-  switch (action.type) {
-    case "CREATE":
-      return {
-        ...state,
-        [action.id]: action.data,
-      };
-    case "MERGE":
-      const currentPlayerState = state[action.id];
-      if (currentPlayerState) {
-        return {
-          ...state,
-          [action.id]: {
-            ...currentPlayerState,
-            ...action.data,
-          },
-        };
-      }
-      return state;
-    case "UPDATE_KEY":
-      const playerToUpdate = state[action.id];
-      if (playerToUpdate && action.key in playerToUpdate) {
-        return {
-          ...state,
-          [action.id]: {
-            ...playerToUpdate,
-            [action.key]: action.value,
-          },
-        };
-      }
-      return state;
-    case "DEL":
-      const newState = { ...state };
-      delete newState[action.id];
-      return newState;
-    case "PING":
-      return state;
-    default:
-      return state;
-  }
+	switch (action.type) {
+		case "CREATE":
+			return {
+				...state,
+				[action.id]: action.data,
+			};
+		case "MERGE":
+			const currentPlayerState = state[action.id];
+			if (currentPlayerState) {
+				return {
+					...state,
+					[action.id]: {
+						...currentPlayerState,
+						...action.data,
+					},
+				};
+			}
+			return state;
+		case "UPDATE_KEY":
+			const playerToUpdate = state[action.id];
+			if (playerToUpdate && action.key in playerToUpdate) {
+				return {
+					...state,
+					[action.id]: {
+						...playerToUpdate,
+						[action.key]: action.value,
+					},
+				};
+			}
+			return state;
+		case "DEL":
+			const newState = { ...state };
+			delete newState[action.id];
+			return newState;
+		case "PING":
+			return state;
+		default:
+			return state;
+	}
 }
 /*
 export function game_reducer(state: GameState = initGame, action: GameAction): GameState {

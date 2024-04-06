@@ -1,13 +1,13 @@
-import { makeHello } from "shared/utils";
 import { Players, UserInputService } from "@rbxts/services";
 import build_mode from "./controllers/build_mode";
 import { store } from "client/store";
 import Object from "@rbxts/object-utils";
+import { makeHello } from "shared/module";
 
 UserInputService.InputBegan.Connect(build_mode);
 const board = store.getState().board;
 
-print("contents of board: ", board);
+//print("contents of board: ", board);
 
 /*
 Object.keys(board.vertices)
