@@ -11,14 +11,14 @@ generate_board(2, 10);
 const global_store = store.getState();
 
 const board = global_store.board;
-const players = global_store.game.players;
+const players = global_store.players;
 
 print(players);
 Players.PlayerAdded.Connect((player) => {
   print("player joined:", player.Name);
   on_player_join(player);
 
-  const playerIds = Object.keys(store.getState().game.players);
+  const playerIds = Object.keys(store.getState().players);
 
   print("Current player IDs in the store:", playerIds);
 });
@@ -27,7 +27,7 @@ Players.PlayerRemoving.Connect((player) => {
   on_player_leave(player);
 
   // Obtain all player IDs from the 'players' object within your store's state
-  const playerIds = Object.keys(store.getState().game.players);
+  const playerIds = Object.keys(store.getState().players);
 
   // Print out the player IDs
   print("Current player IDs in the store:", playerIds);

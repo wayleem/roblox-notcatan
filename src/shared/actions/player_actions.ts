@@ -1,5 +1,5 @@
 import { Resource, DevCard, Road, Settlement, City } from "shared/types";
-import { PlayerState } from "server/store/game_reducer";
+import { PlayerState } from "server/store/players_reducer";
 
 export type DataPayload<T extends Resource | DevCard | Road | Settlement | City | number | PlayerState> = {
   playerId: number;

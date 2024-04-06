@@ -1,12 +1,17 @@
+// new data
 type Action_Create<T> = { id: string; data: T; type: "CREATE" }
+// big data swap
 type Action_Merge<T> = { id: string; data: Partial<T>; type: "MERGE" }
+// change one key 
 type Action_Update<T> = {
   id: string
   key: keyof T
   value: unknown
   type: "UPDATE_KEY"
 }
+// delete
 type Action_Del = { id: string; type: "DEL" }
+// force update clients
 type Action_Flush = { id: string; type: "PING" }
 
 export type MyActions<T> =

@@ -1,7 +1,8 @@
 import { Players } from "@rbxts/services";
-import { add_player, remove_player } from "shared/actions/game_actions";
+import { create, del } from "shared/actions";
 import { store } from "server/store";
-import { PlayerState } from "server/store/game_reducer";
+import { PlayerState } from "server/store/players_reducer";
+import { serialize_userid } from "shared/utils";
 
 export function on_player_join(player: Player) {
   const initPlayer: PlayerState = {
@@ -15,9 +16,9 @@ export function on_player_join(player: Player) {
     numVictoryPoints: 0,
   };
 
-  store.dispatch(add_player(player.UserId, initPlayer));
+  store.dispatch(create(serialize_userid(player.UserId), initPlayer));
 }
 
 export function on_player_leave(player: Player) {
-  store.dispatch(remove_player(player.UserId));
+  store.dispatch(del(serialize_userid(player.UserId)));
 }

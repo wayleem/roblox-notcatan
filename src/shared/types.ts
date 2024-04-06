@@ -46,7 +46,6 @@ export interface Hex extends Node {
 }
 
 export interface Building {
-  id: string;
   ownerId: number;
   part?: Part;
 }

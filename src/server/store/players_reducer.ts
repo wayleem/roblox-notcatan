@@ -1,5 +1,6 @@
-import { DataPayload, GameAction } from "shared/actions/game_actions";
-import { DevCard, Resource, Road, Settlement, City, Edge } from "shared/types";
+import Object from "@rbxts/object-utils";
+import { MyActions } from "shared/actions";
+import { DevCard, Resource, Road, Settlement, City, Edge, ArrayT } from "shared/types";
 
 export interface PlayerState {
   teamColor: string;
@@ -20,44 +21,51 @@ export interface GameState {
   round: number;
   largestArmy: [number, number | undefined];
   longestRoad: [number, number | undefined];
-  players: {
-    [playerId: number]: PlayerState;
-  };
+  players: ArrayT<PlayerState>;
 }
 
-const initGame: GameState = {
-  turn: 0,
-  round: 1,
-  largestArmy: [3, undefined],
-  longestRoad: [5, undefined],
-  players: {
-    /* test player
-    [123]: {
-      teamColor: "green",
-
-      resources: {
-        wood: 0,
-        wheat: 0,
-        ore: 0,
-        brick: 0,
-        sheep: 0,
-      },
-      devCards: {
-        knight: 0,
-        monopoly: 0,
-        year_of_plenty: 0,
-        road_building: 0,
-        point: 0,
-      },
-      roads: [],
-      settlements: [],
-      cities: [],
-      numPlayedKnights: 0,
-      numVictoryPoints: 0,
-    },*/
-  },
-};
-
+export function players_reducer(state: ArrayT<PlayerState> = {}, action: MyActions<PlayerState>): ArrayT<PlayerState> {
+  switch (action.type) {
+    case "CREATE":
+      return {
+        ...state,
+        [action.id]: action.data,
+      };
+    case "MERGE":
+      const currentPlayerState = state[action.id];
+      if (currentPlayerState) {
+        return {
+          ...state,
+          [action.id]: {
+            ...currentPlayerState,
+            ...action.data,
+          },
+        };
+      }
+      return state;
+    case "UPDATE_KEY":
+      const playerToUpdate = state[action.id];
+      if (playerToUpdate && action.key in playerToUpdate) {
+        return {
+          ...state,
+          [action.id]: {
+            ...playerToUpdate,
+            [action.key]: action.value,
+          },
+        };
+      }
+      return state;
+    case "DEL":
+      const newState = { ...state };
+      delete newState[action.id];
+      return newState;
+    case "PING":
+      return state;
+    default:
+      return state;
+  }
+}
+/*
 export function game_reducer(state: GameState = initGame, action: GameAction): GameState {
   switch (action.type) {
     case "UPDATE_RESOURCES":
@@ -333,3 +341,4 @@ function remove_player(state: GameState, payload: number): GameState {
 
   return newState;
 }
+*/

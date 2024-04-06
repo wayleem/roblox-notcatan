@@ -2,7 +2,6 @@ import { makeHello } from "shared/utils";
 import { Players, UserInputService } from "@rbxts/services";
 import build_mode from "./controllers/build_mode";
 import { store } from "client/store";
-import { add_road } from "shared/actions/game_actions";
 import Object from "@rbxts/object-utils";
 
 UserInputService.InputBegan.Connect(build_mode);
