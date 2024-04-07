@@ -1,11 +1,18 @@
-import { Players, UserInputService } from "@rbxts/services";
+import { Players, ReplicatedStorage, UserInputService } from "@rbxts/services";
 import build_mode from "./controllers/build_mode";
-import { store } from "client/store";
+import { local_store } from "client/local_store";
 import Object from "@rbxts/object-utils";
 import { makeHello } from "shared/module";
+import { MyActions, merge } from "shared/actions";
+
+const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent
+remoteEvent.OnClientEvent.Connect((action) => {
+  print("Received state from server: ", action)
+  local_store.dispatch(action)
+})
 
 UserInputService.InputBegan.Connect(build_mode);
-const board = store.getState().board;
+const board = local_store.getState().board;
 
 //print("contents of board: ", board);
 
