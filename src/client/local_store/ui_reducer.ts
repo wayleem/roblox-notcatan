@@ -1,1 +1,1 @@
-export function ui_reducer() { }
+export function ui_reducer() {}
