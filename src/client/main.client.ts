@@ -11,6 +11,7 @@ remoteEvent.OnClientEvent.Connect((action) => {
 	local_store.dispatch(action);
 });
 
+wait(12);
 // this gives {}
 print("client vertices: ", Object.keys(local_store.getState().board.vertices));
 // this gives {}

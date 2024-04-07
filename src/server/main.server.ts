@@ -11,13 +11,9 @@ updateClientEvent.Name = "UpdateClientEvent";
 updateClientEvent.Parent = ReplicatedStorage;
 */
 
-generate_board(2, 10);
+// dispatch board update
 
-// this is correct
-print("server vertices: ", Object.keys(store.getState().board.vertices));
-
-const players = store.getState().players;
-print("players:" + players);
+// dispatch player update
 Players.PlayerAdded.Connect((player) => {
 	print("player joined:", player.Name);
 	on_player_join(player);
@@ -34,5 +30,10 @@ Players.PlayerRemoving.Connect((player) => {
 
 	print("Current player IDs in the store:", playerIds);
 });
+wait(10);
+generate_board(2, 10);
+
+// this is correct
+print("server vertices: ", Object.keys(store.getState().board.vertices));
 
 print(makeHello("main.server.ts"));
