@@ -39,6 +39,7 @@ export function players_reducer(state: ArrayT<PlayerState> = {}, action: MyActio
 				delete newState[action.id];
 				return newState;
 			case "PING":
+				state = action.state;
 				return state;
 			default:
 				return state;

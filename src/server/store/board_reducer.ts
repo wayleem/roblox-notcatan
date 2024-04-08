@@ -1,20 +1,29 @@
 import { combineReducers } from "@rbxts/rodux";
+import { ReplicatedStorage } from "@rbxts/services";
 import { MyActions } from "shared/actions";
 import { ArrayT, Edge, Hex, Vertex } from "shared/types";
 import { remote_update_client } from "shared/utils";
+
+const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
+
+export interface BoardState {
+	vertices: ArrayT<Vertex>;
+	edges: ArrayT<Edge>;
+	hexes: ArrayT<Hex>;
+}
 
 function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): ArrayT<Vertex> {
 	if (action.target === "vertex")
 		switch (action.type) {
 			case "CREATE":
-				remote_update_client<Vertex>(action);
+				remoteEvent.FireAllClients(action);
 				return {
 					...state,
 					[action.id]: action.data,
 				};
 
 			case "MERGE":
-				remote_update_client<Vertex>(action);
+				remoteEvent.FireAllClients(action);
 				const currentState = state[action.id];
 				if (currentState) {
 					return {
@@ -27,7 +36,7 @@ function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): 
 				}
 				return state;
 			case "UPDATE_KEY":
-				remote_update_client<Vertex>(action);
+				remoteEvent.FireAllClients(action);
 				const keyToUpdate = state[action.id];
 				if (keyToUpdate && action.key in keyToUpdate) {
 					return {
@@ -40,14 +49,12 @@ function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): 
 				}
 				return state;
 			case "DEL":
-				remote_update_client<Vertex>(action);
+				remoteEvent.FireAllClients(action);
 				const newState = { ...state };
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remote_update_client<Vertex>(action);
-				return state;
-			default:
+				remoteEvent.FireClient(action.player, action);
 				return state;
 		}
 	return state;
@@ -57,13 +64,13 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 	if (action.target === "edge")
 		switch (action.type) {
 			case "CREATE":
-				remote_update_client<Edge>(action);
+				remoteEvent.FireAllClients(action);
 				return {
 					...state,
 					[action.id]: action.data,
 				};
 			case "MERGE":
-				remote_update_client<Edge>(action);
+				remoteEvent.FireAllClients(action);
 				const currentState = state[action.id];
 				if (currentState) {
 					return {
@@ -76,7 +83,7 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 				}
 				return state;
 			case "UPDATE_KEY":
-				remote_update_client<Edge>(action);
+				remoteEvent.FireAllClients(action);
 				const keyToUpdate = state[action.id];
 				if (keyToUpdate && action.key in keyToUpdate) {
 					return {
@@ -89,14 +96,12 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 				}
 				return state;
 			case "DEL":
-				remote_update_client<Edge>(action);
+				remoteEvent.FireAllClients(action);
 				const newState = { ...state };
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remote_update_client<Edge>(action);
-				return state;
-			default:
+				remoteEvent.FireClient(action.player, action);
 				return state;
 		}
 	return state;
@@ -106,13 +111,13 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 	if (action.target === "hex")
 		switch (action.type) {
 			case "CREATE":
-				remote_update_client<Hex>(action);
+				remoteEvent.FireAllClients(action);
 				return {
 					...state,
 					[action.id]: action.data,
 				};
 			case "MERGE":
-				remote_update_client<Hex>(action);
+				remoteEvent.FireAllClients(action);
 				const currentState = state[action.id];
 				if (currentState) {
 					return {
@@ -125,7 +130,7 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 				}
 				return state;
 			case "UPDATE_KEY":
-				remote_update_client<Hex>(action);
+				remoteEvent.FireAllClients(action);
 				const keyToUpdate = state[action.id];
 				if (keyToUpdate && action.key in keyToUpdate) {
 					return {
@@ -138,14 +143,12 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 				}
 				return state;
 			case "DEL":
-				remote_update_client<Hex>(action);
+				remoteEvent.FireAllClients(action);
 				const newState = { ...state };
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remote_update_client<Vertex>(action);
-				return state;
-			default:
+				remoteEvent.FireClient(action.player, action);
 				return state;
 		}
 	return state;

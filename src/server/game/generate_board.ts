@@ -1,6 +1,6 @@
 import { ServerStorage } from "@rbxts/services";
 import { ArrayT, Vertex, Edge, Hex } from "shared/types";
-import { create, update } from "shared/actions";
+import { create } from "shared/actions";
 import { store } from "server/store";
 import { someT, is_vector3_equal, serialize_vertex, serialize_edge, serialize_hex } from "shared/utils";
 

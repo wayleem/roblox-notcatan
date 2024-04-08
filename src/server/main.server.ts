@@ -4,6 +4,8 @@ import Object from "@rbxts/object-utils";
 import generate_board from "./game/generate_board";
 import { on_player_join, on_player_leave } from "./players/connection";
 import { makeHello } from "shared/module";
+import { flush } from "shared/actions";
+import { serialize_userid } from "shared/utils";
 
 /*
 const updateClientEvent = new Instance("RemoteEvent") as RemoteEvent;
@@ -12,6 +14,7 @@ updateClientEvent.Parent = ReplicatedStorage;
 */
 
 // dispatch board update
+generate_board(2, 10);
 
 // dispatch player update
 Players.PlayerAdded.Connect((player) => {
@@ -19,6 +22,11 @@ Players.PlayerAdded.Connect((player) => {
 	on_player_join(player);
 
 	const playerIds = Object.keys(store.getState().players);
+
+	store.dispatch(flush(player, store.getState().board.vertices, "vertex"));
+	store.dispatch(flush(player, store.getState().board.edges, "edge"));
+	store.dispatch(flush(player, store.getState().board.hexes, "hex"));
+	store.dispatch(flush(player, store.getState().players, "player"));
 
 	print("Current player IDs in the store:", playerIds);
 });
@@ -30,8 +38,6 @@ Players.PlayerRemoving.Connect((player) => {
 
 	print("Current player IDs in the store:", playerIds);
 });
-wait(10);
-generate_board(2, 10);
 
 // this is correct
 print("server vertices: ", Object.keys(store.getState().board.vertices));

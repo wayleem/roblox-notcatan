@@ -3,7 +3,6 @@ import { MyActions } from "shared/actions";
 import { ArrayT, Edge, Hex, Vertex } from "shared/types";
 
 function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): ArrayT<Vertex> {
-	print("hit client vertex reducer:", action);
 	if (action.target === "vertex")
 		switch (action.type) {
 			case "CREATE":
@@ -42,6 +41,7 @@ function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): 
 				delete newState[action.id];
 				return newState;
 			case "PING":
+				state = action.state;
 				return state;
 			default:
 				return state;
@@ -86,6 +86,7 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 				delete newState[action.id];
 				return newState;
 			case "PING":
+				action.state = state;
 				return state;
 			default:
 				return state;
@@ -130,6 +131,7 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 				delete newState[action.id];
 				return newState;
 			case "PING":
+				state = action.state;
 				return state;
 			default:
 				return state;
