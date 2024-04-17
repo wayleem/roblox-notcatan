@@ -15,7 +15,7 @@ type Action_Update<T> = {
 // delete
 type Action_Del = { id: string; type: "DEL"; target: string };
 // force update clients
-type Action_Flush<T> = { player: Player; state: ArrayT<T>; type: "PING"; target: string };
+type Action_Flush<T> = { id: string; state: ArrayT<T>; type: "PING"; target: string };
 
 export type MyActions<T> = Action_Create<T> | Action_Merge<T> | Action_Update<T> | Action_Del | Action_Flush<T>;
 
@@ -55,10 +55,10 @@ export function del(id: string, target: string): Action_Del {
 	};
 }
 
-export function flush<T>(player: Player, state: ArrayT<T>, target: string): Action_Flush<T> {
+export function flush<T>(id: string, state: ArrayT<T>, target: string): Action_Flush<T> {
 	return {
 		type: "PING",
-		player,
+		id,
 		state,
 		target,
 	};

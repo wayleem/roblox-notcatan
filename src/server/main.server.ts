@@ -5,7 +5,7 @@ import generate_board from "./game/generate_board";
 import { on_player_join, on_player_leave } from "./players/connection";
 import { makeHello } from "shared/module";
 import { flush } from "shared/actions";
-import { serialize_userid } from "shared/utils";
+import { deserialize_userid, serialize_userid } from "shared/utils";
 
 /*
 const updateClientEvent = new Instance("RemoteEvent") as RemoteEvent;
@@ -21,14 +21,16 @@ Players.PlayerAdded.Connect((player) => {
 	print("player joined:", player.Name);
 	on_player_join(player);
 
-	const playerIds = Object.keys(store.getState().players);
+	const allPlayerIds = Object.keys(store.getState().players);
 
-	store.dispatch(flush(player, store.getState().board.vertices, "vertex"));
-	store.dispatch(flush(player, store.getState().board.edges, "edge"));
-	store.dispatch(flush(player, store.getState().board.hexes, "hex"));
-	store.dispatch(flush(player, store.getState().players, "player"));
+	const playerId = serialize_userid(player.UserId);
 
-	print("Current player IDs in the store:", playerIds);
+	store.dispatch(flush(playerId, store.getState().board.vertices, "vertex"));
+	store.dispatch(flush(playerId, store.getState().board.edges, "edge"));
+	store.dispatch(flush(playerId, store.getState().board.hexes, "hex"));
+	store.dispatch(flush(playerId, store.getState().players, "player"));
+
+	print("Current player IDs in the store:", allPlayerIds);
 });
 Players.PlayerRemoving.Connect((player) => {
 	print("Player leaving:", player.Name);

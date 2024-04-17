@@ -1,8 +1,8 @@
 import { combineReducers } from "@rbxts/rodux";
-import { ReplicatedStorage } from "@rbxts/services";
+import { Players, ReplicatedStorage } from "@rbxts/services";
 import { MyActions } from "shared/actions";
 import { ArrayT, Edge, Hex, Vertex } from "shared/types";
-import { remote_update_client } from "shared/utils";
+import { deserialize_userid, remote_update_client } from "shared/utils";
 
 const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 
@@ -54,7 +54,8 @@ function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): 
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remoteEvent.FireClient(action.player, action);
+				const localPlayer = Players.GetPlayerByUserId(deserialize_userid(action.id));
+				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				return state;
 		}
 	return state;
@@ -101,7 +102,8 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remoteEvent.FireClient(action.player, action);
+				const localPlayer = Players.GetPlayerByUserId(deserialize_userid(action.id));
+				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				return state;
 		}
 	return state;
@@ -148,7 +150,8 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				remoteEvent.FireClient(action.player, action);
+				const localPlayer = Players.GetPlayerByUserId(deserialize_userid(action.id));
+				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				return state;
 		}
 	return state;

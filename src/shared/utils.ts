@@ -7,6 +7,11 @@ export function serialize_userid(userId: number): string {
 	return `player:${userId}`;
 }
 
+export function deserialize_userid(userId: string): number {
+	const parts = userId.split(":");
+	return tonumber(parts[1], 10) as number;
+}
+
 export function serialize_vertex(vector: Vector3): string {
 	const x = tostring(math.round(vector.X * 100) / 100);
 	const y = tostring(math.round(vector.Y * 100) / 100);
