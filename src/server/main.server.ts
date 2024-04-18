@@ -23,22 +23,15 @@ Players.PlayerAdded.Connect((player) => {
 
 	const allPlayerIds = Object.keys(store.getState().players);
 
-	const playerId = serialize_userid(player.UserId);
-
-	store.dispatch(flush(playerId, store.getState().board.vertices, "vertex"));
-	store.dispatch(flush(playerId, store.getState().board.edges, "edge"));
-	store.dispatch(flush(playerId, store.getState().board.hexes, "hex"));
-	store.dispatch(flush(playerId, store.getState().players, "player"));
-
 	print("Current player IDs in the store:", allPlayerIds);
 });
 Players.PlayerRemoving.Connect((player) => {
 	print("Player leaving:", player.Name);
 	on_player_leave(player);
 
-	const playerIds = Object.keys(store.getState().players);
+	const allPlayerIds = Object.keys(store.getState().players);
 
-	print("Current player IDs in the store:", playerIds);
+	print("Current player IDs in the store:", allPlayerIds);
 });
 
 // this is correct

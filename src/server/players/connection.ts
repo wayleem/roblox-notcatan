@@ -1,5 +1,5 @@
 import { Players } from "@rbxts/services";
-import { create, del } from "shared/actions";
+import { create, del, flush } from "shared/actions";
 import { store } from "server/store";
 import { PlayerState } from "server/store/players_reducer";
 import { serialize_userid } from "shared/utils";
@@ -15,6 +15,12 @@ export function on_player_join(player: Player) {
 		numPlayedKnights: 0,
 		numVictoryPoints: 0,
 	};
+
+	const playerId = serialize_userid(player.UserId);
+
+	store.dispatch(flush(playerId, store.getState().board.vertices, "vertex"));
+	store.dispatch(flush(playerId, store.getState().board.edges, "edge"));
+	store.dispatch(flush(playerId, store.getState().board.hexes, "hex"));
 
 	store.dispatch(create<PlayerState>(serialize_userid(player.UserId), initPlayer, "player"));
 }
