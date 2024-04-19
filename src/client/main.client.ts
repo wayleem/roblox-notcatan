@@ -1,11 +1,18 @@
+import { Players, ReplicatedStorage } from "@rbxts/services";
+import Object from "@rbxts/object-utils";
 import { makeHello } from "shared/module";
-import { Players } from "@rbxts/services";
+import { local_store } from "./local_store";
 
+const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
+remoteEvent.OnClientEvent.Connect((action) => {
+	print("Received action from server: ", action);
+	local_store.dispatch(action);
+});
 
-/*
- * Find a way to give both client and server access to the same Game Instance so
- * server can generate the board while client handles mouse hover logic for local
- * use spawn multithreading to check for hover when player mouse moves instead of while true
- * need to add mouse leave function too
- */
+Players.LocalPlayer.CharacterAdded.Connect((c) => {
+	print("client vertices: ", Object.keys(local_store.getState().board.vertices));
+
+	print("client's data: ", local_store.getState().player);
+});
+
 print(makeHello("main.client.ts"));
