@@ -1,5 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { Edge, Vertex, ArrayT, Hex } from "./types";
+import { Edge, Vertex, ArrayT, Hex, Resource, DevCard } from "./types";
 import Object from "@rbxts/object-utils";
 import { MyActions } from "./actions";
 
@@ -65,4 +65,9 @@ export function someT<T>(data: ArrayT<T>, predicate: (value: T) => boolean): boo
 export function remote_update_client<T>(action: MyActions<T>) {
 	const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 	remoteEvent.FireAllClients(action);
+}
+
+export function update_hand<T = Resource | DevCard>(data: T, key: keyof T, count: number): T {
+	(data[key] as number) += count;
+	return data;
 }
