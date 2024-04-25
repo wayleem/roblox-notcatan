@@ -25,10 +25,18 @@ button.MouseClick.Connect(() => {
 });
 
 clientButton.MouseClick.Connect(() => {
+  /*
   const vertices = local_store.getState().board.vertices;
   Object.values(vertices).forEach((vertex) => {
     vertex.part.BrickColor = new BrickColor("Bright red");
   });
+  */
+  const folder = Workspace.WaitForChild("vertices") as Folder
+  const vertices = folder.GetChildren() as Part[]
+  vertices.forEach((v: Part) => {
+    v.BrickColor = new BrickColor("Bright red")
+  })
+
 });
 
 print(makeHello("main.client.ts"));
