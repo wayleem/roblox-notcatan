@@ -12,22 +12,33 @@ export function deserialize_userid(userId: string): number {
   return tonumber(parts[1], 10) as number;
 }
 
-export function serialize_vertex(vector: Vector3): string {
+export function serialize_vertex(vertex: Vertex): string {
+  const vector = vertex.position
   const x = tostring(math.round(vector.X * 100) / 100);
   const y = tostring(math.round(vector.Y * 100) / 100);
   const z = tostring(math.round(vector.Z * 100) / 100);
   return `vertex:(${x}:${y}:${z})`;
 }
 
-export function serialize_hex(vector: Vector3): string {
+export function serialize_hex(hex: Hex): string {
+  const vector = hex.position
+  const resource = hex.resource
   const x = tostring(math.round(vector.X * 100) / 100);
   const y = tostring(math.round(vector.Y * 100) / 100);
   const z = tostring(math.round(vector.Z * 100) / 100);
-  return `hex:(${x}:${y}:${z})`;
+
+  let biome = "desert"
+  if (resource.ore > 0) biome = "ore"
+  if (resource.wood > 0) biome = "wood"
+  if (resource.brick > 0) biome = "brick"
+  if (resource.sheep > 0) biome = "sheep"
+  if (resource.wheat > 0) biome = "wheat"
+
+  return `hex:(${x}:${y}:${z}:${biome}:${hex.token})`;
 }
 
-export function serialize_edge(cframe: CFrame): string {
-  const pos = cframe.Position;
+export function serialize_edge(edge: Edge): string {
+  const pos = edge.cframe.Position;
   const x = tostring(math.round(pos.X * 100) / 100);
   const y = tostring(math.round(pos.Y * 100) / 100);
   const z = tostring(math.round(pos.Z * 100) / 100);
@@ -94,4 +105,14 @@ export function create_folder(name: string, parent: Instance): Folder {
   folder.Parent = parent;
   folder.Name = name;
   return folder;
+}
+
+export function shuffle<T>(array: T[]): T[] {
+  for (let i = array.size() - 1; i > 0; i--) {
+    const j = math.floor(math.random() * (i + 1));
+    const temp = array[i];
+    array[i] = array[j];
+    array[j] = temp;
+  }
+  return array;
 }
