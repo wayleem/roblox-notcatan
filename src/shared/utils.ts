@@ -89,3 +89,9 @@ export function merge_hand<T extends Record<string, number>>(data: T, payload: T
   }
   return newData;
 }
+export function create_folder(name: string, parent: Instance): Folder {
+  const folder = new Instance("Folder");
+  folder.Parent = parent;
+  folder.Name = name;
+  return folder;
+}
