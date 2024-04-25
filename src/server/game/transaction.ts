@@ -5,7 +5,7 @@ import { store } from "server/store";
 import { Hex } from "shared/types";
 import { DeckState } from "server/store/deck_reducer";
 import Object from "@rbxts/object-utils";
-import { DEV_CARD_COST } from "shared/costs";
+import { DEV_CARD_COST } from "shared/static";
 
 export function tap_resource(hex: Hex) {
   hex.vertices.forEach((v) => {
