@@ -31,7 +31,7 @@ for (let i = 0; i < 4; i++) {
   }
 }
 
-const tokens = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11];
+let tokens = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11];
 
 // Shuffle function for arrays
 function shuffle<T>(array: T[]): T[] {
@@ -44,14 +44,34 @@ function shuffle<T>(array: T[]): T[] {
   return array;
 }
 
-// Prepare shuffled resources and tokens
-shuffle(resources);
-shuffle(tokens);
+// Assuming you have already populated your resources and tokens arrays
+shuffle(resources); // Shuffle resources
+shuffle(tokens);    // Shuffle tokens independently
+
+// Further improve distribution by ensuring not to place high-value tokens (6,8) adjacent to each other
+const highValueTokens = [6, 8];
+let lastHighValueIndex = -2; // Track the last index of high-value tokens
+
+tokens = tokens.map((token, index) => {
+  if (highValueTokens.includes(token) && math.abs(lastHighValueIndex - index) <= 1) {
+    // Find a non-high-value position to swap with
+    for (let j = index + 1; j < tokens.size(); j++) {
+      if (!highValueTokens.includes(tokens[j])) {
+        [tokens[index], tokens[j]] = [tokens[j], tokens[index]]; // Swap
+        break;
+      }
+    }
+  }
+  if (highValueTokens.includes(token)) {
+    lastHighValueIndex = index;
+  }
+  return token;
+});
 
 export default function generate_board(radius: number, tileSize: number): void {
-  create_folder("vertices", Workspace)
-  create_folder("edges", Workspace)
-  create_folder("hexes", Workspace)
+  create_folder("vertices", Workspace);
+  create_folder("edges", Workspace);
+  create_folder("hexes", Workspace);
 
   let resourceIndex = 0;
   for (let q = -radius; q <= radius; q++) {
