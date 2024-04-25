@@ -2,78 +2,17 @@ import { ServerStorage, Workspace } from "@rbxts/services";
 import { ArrayT, Vertex, Edge, Hex, Resource } from "shared/types";
 import { create } from "shared/actions";
 import { store } from "server/store";
-import { someT, is_vector3_equal, serialize_vertex, serialize_edge, serialize_hex, create_folder } from "shared/utils";
+import { someT, is_vector3_equal, serialize_vertex, serialize_edge, serialize_hex, create_folder, shuffle } from "shared/utils";
 import Object from "@rbxts/object-utils";
+import { GET_BOARD_RESOURCES, PART_THICKNESS, VERTEX_SIZE, GET_BOARD_TOKENS } from "shared/static";
 
-const PART_THICKNESS: number = 1;
-const VERTEX_SIZE: number = 2;
-
-// Resource and token setup
-const resources: Resource[] = [];
-
-for (let i = 0; i < 4; i++) {
-  // 4 wheat, 4 sheep, 4 wood
-  resources.push(
-    { wheat: 1, sheep: 0, ore: 0, wood: 0, brick: 0 },
-    { wheat: 0, sheep: 1, ore: 0, wood: 0, brick: 0 },
-    { wheat: 0, sheep: 0, ore: 0, wood: 1, brick: 0 },
-  );
-  // 3 ore, 3 brick
-  if (i < 3) {
-    resources.push(
-      { wheat: 0, sheep: 0, ore: 3, wood: 0, brick: 0 },
-      { wheat: 0, sheep: 0, ore: 0, wood: 0, brick: 3 },
-    );
-  }
-  // 1 desert
-  if (i < 1) {
-    resources.push({ wheat: 0, sheep: 0, ore: 0, wood: 0, brick: 0 });
-  }
-}
-
-let tokens = [5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11];
-
-// Shuffle function for arrays
-function shuffle<T>(array: T[]): T[] {
-  for (let i = array.size() - 1; i > 0; i--) {
-    const j = math.floor(math.random() * (i + 1));
-    const temp = array[i];
-    array[i] = array[j];
-    array[j] = temp;
-  }
-  return array;
-}
-
-// Assuming you have already populated your resources and tokens arrays
-shuffle(resources); // Shuffle resources
-shuffle(tokens);    // Shuffle tokens independently
-
-// Further improve distribution by ensuring not to place high-value tokens (6,8) adjacent to each other
-const highValueTokens = [6, 8];
-let lastHighValueIndex = -2; // Track the last index of high-value tokens
-
-tokens = tokens.map((token, index) => {
-  if (highValueTokens.includes(token) && math.abs(lastHighValueIndex - index) <= 1) {
-    // Find a non-high-value position to swap with
-    for (let j = index + 1; j < tokens.size(); j++) {
-      if (!highValueTokens.includes(tokens[j])) {
-        [tokens[index], tokens[j]] = [tokens[j], tokens[index]]; // Swap
-        break;
-      }
-    }
-  }
-  if (highValueTokens.includes(token)) {
-    lastHighValueIndex = index;
-  }
-  return token;
-});
 
 export default function generate_board(radius: number, tileSize: number): void {
-  create_folder("vertices", Workspace);
-  create_folder("edges", Workspace);
-  create_folder("hexes", Workspace);
-
+  const resources = GET_BOARD_RESOURCES()
+  const tokens = GET_BOARD_TOKENS()
   let resourceIndex = 0;
+
+
   for (let q = -radius; q <= radius; q++) {
     const r1 = math.max(-radius, -q - radius);
     const r2 = math.min(radius, -q + radius);
@@ -84,6 +23,8 @@ export default function generate_board(radius: number, tileSize: number): void {
       resourceIndex++;
     }
   }
+  const board = store.getState().board
+  generate_parts(board.vertices, board.edges, board.hexes)
 }
 
 function create_hexagon(q: number, r: number, tileSize: number, resource: Resource, token: number): void {
@@ -112,29 +53,37 @@ function create_hexagon(q: number, r: number, tileSize: number, resource: Resour
     const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
 
     if (!someT(edges, (e) => is_vector3_equal(e.cframe.Position, edgeCFrame.Position))) {
-      const edgePart = create_edge_part(edgeCFrame, vertexVector, nextVertexVector);
-      const edge: Edge = { cframe: edgeCFrame, vertices: [vertexVector, nextVertexVector], part: edgePart };
+      const edge: Edge = { cframe: edgeCFrame, vertices: [vertexVector, nextVertexVector] };
       hexEdges.push(edge);
-      store.dispatch(create<Edge>(serialize_edge(edgeCFrame), edge, "edge"));
+      store.dispatch(create<Edge>(serialize_edge(edge), edge, "edge"));
     }
 
     if (!someT(vertices, (v) => is_vector3_equal(v.position, vertexVector))) {
-      const vertexPart = create_vertex_part(vertexVector);
-      const vertex: Vertex = { position: vertexVector, part: vertexPart };
+      const vertex: Vertex = { position: vertexVector };
       hexVertices.push(vertex);
-      store.dispatch(create<Vertex>(serialize_vertex(vertexVector), vertex, "vertex"));
+      store.dispatch(create<Vertex>(serialize_vertex(vertex), vertex, "vertex"));
     }
   }
 
-  const hexPart = ServerStorage.WaitForChild("Tile").Clone() as Part;
-  const hexFolder = Workspace.WaitForChild("hexes") as Folder
+  const hex: Hex = { position: center, vertices: hexVertices, edges: hexEdges, resource, token };
+  store.dispatch(create<Hex>(serialize_hex(hex), hex, "hex"));
+}
 
-  hexPart.Name = serialize_hex(center)
-  hexPart.Parent = hexFolder;
-  hexPart.Position = center;
+function generate_parts(vertices: ArrayT<Vertex>, edges: ArrayT<Edge>, hexes: ArrayT<Hex>) {
 
-  const hex: Hex = { position: center, vertices: hexVertices, edges: hexEdges, part: hexPart, resource, token };
-  store.dispatch(create<Hex>(serialize_hex(center), hex, "hex"));
+  create_folder("vertices", Workspace);
+  create_folder("edges", Workspace);
+  create_folder("hexes", Workspace);
+
+  Object.values(vertices).forEach((v) => {
+    create_vertex_part(v)
+  })
+  Object.values(edges).forEach((e) => {
+    create_edge_part(e)
+  })
+  Object.values(hexes).forEach((h) => {
+    create_hex_part(h)
+  })
 }
 
 // Additional functions for creating parts remain unchanged
@@ -144,16 +93,28 @@ function hex_to_world(q: number, r: number, tileSize: number): Vector3 {
   const z = tileSize * (math.sqrt(3) * r + (math.sqrt(3) / 2) * q);
   return new Vector3(x, 0, z);
 }
+function create_hex_part(hex: Hex) {
+  const hexPart = ServerStorage.WaitForChild("Tile").Clone() as Part;
+  const hexFolder = Workspace.WaitForChild("hexes") as Folder
 
-function create_edge_part(cframe: CFrame, v1_vector: Vector3, v2_vector: Vector3): Part {
+  hexPart.Name = serialize_hex(hex)
+  hexPart.Parent = hexFolder;
+  hexPart.Position = hex.position;
+
+  return hexPart
+}
+
+function create_edge_part(edge: Edge): Part {
+  const v1_vector = edge.vertices[0]
+  const v2_vector = edge.vertices[1]
   const edgePart = new Instance("Part");
   const highlight = new Instance("Highlight");
   const clickDetector = new Instance("ClickDetector");
   const edgeFolder = Workspace.WaitForChild("edges") as Folder
 
-  edgePart.Name = serialize_edge(cframe);
+  edgePart.Name = serialize_edge(edge);
   edgePart.Size = new Vector3(PART_THICKNESS, PART_THICKNESS, v1_vector.sub(v2_vector).Magnitude);
-  edgePart.CFrame = cframe;
+  edgePart.CFrame = edge.cframe;
   edgePart.Anchored = true;
 
   edgeFolder.Parent = Workspace
@@ -165,16 +126,16 @@ function create_edge_part(cframe: CFrame, v1_vector: Vector3, v2_vector: Vector3
   return edgePart;
 }
 
-function create_vertex_part(position: Vector3): Part {
+function create_vertex_part(vertex: Vertex): Part {
   const vertexPart = new Instance("Part");
   const highlight = new Instance("Highlight");
   const clickDetector = new Instance("ClickDetector");
   const vertexFolder = Workspace.WaitForChild("vertices") as Folder
 
-  vertexPart.Name = serialize_vertex(position);
+  vertexPart.Name = serialize_vertex(vertex);
   vertexPart.Shape = Enum.PartType.Ball;
   vertexPart.Size = new Vector3(VERTEX_SIZE, VERTEX_SIZE, VERTEX_SIZE);
-  vertexPart.Position = position;
+  vertexPart.Position = vertex.position;
   vertexPart.Anchored = true;
 
   vertexFolder.Parent = Workspace
