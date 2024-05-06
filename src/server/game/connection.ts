@@ -2,8 +2,27 @@ import { create, del, flush } from "shared/actions";
 import { store } from "server/store";
 import { PlayerState } from "server/store/players_reducer";
 import { serialize_userid } from "shared/utils";
+import { Players } from "@rbxts/services";
+import Object from "@rbxts/object-utils";
 
-export function on_player_join(player: Player) {
+Players.PlayerAdded.Connect((player) => {
+	print("player joined:", player.Name);
+	on_player_join(player);
+
+	const allPlayerIds = Object.keys(store.getState().players);
+
+	print("Current player IDs in the store:", allPlayerIds);
+});
+Players.PlayerRemoving.Connect((player) => {
+	print("Player leaving:", player.Name);
+	on_player_leave(player);
+
+	const allPlayerIds = Object.keys(store.getState().players);
+
+	print("Current player IDs in the store:", allPlayerIds);
+});
+
+function on_player_join(player: Player) {
 	const initPlayer: PlayerState = {
 		teamColor: "red", // placeholder
 		resources: { wheat: 0, sheep: 0, ore: 0, wood: 0, brick: 0 },
@@ -24,6 +43,6 @@ export function on_player_join(player: Player) {
 	store.dispatch(create<PlayerState>(playerId, initPlayer, "player"));
 }
 
-export function on_player_leave(player: Player) {
+function on_player_leave(player: Player) {
 	store.dispatch(del(serialize_userid(player.UserId), "player"));
 }
