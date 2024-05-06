@@ -1,65 +1,96 @@
-// Import necessary Roblox services and modules
 import { Players, Workspace } from "@rbxts/services";
-import { Vertex, Edge } from "shared/types";
-import { local_store } from "client/local_store";
+import { Vertex, Edge, ArrayT } from "shared/types";
+import { local_store } from "../local_store";
+import { is_vector3_equal, serialize_vertex, serialize_edge } from "shared/utils";
+import Object from "@rbxts/object-utils";
 
-// Helper function to check if a vertex is buildable
-function is_vertex_buildable(vertex: Vertex, playerId: number): boolean {
-  // Ensure there is a building present and check ownership
-  const building = vertex.building;
-  if (building) {
-    if (building.ownerId !== playerId) {
-      return false; // Another player's settlement
-    }
-    // Check if building is a city, cities are not upgradable
-    if ('points' in building && building.points === 2) {
-      return false; // City already built, not upgradable
-    }
-  }
+export default function build_mode(status: boolean) {
+	const localPlayer = Players.LocalPlayer;
+	const board = local_store.getState().board;
+	const vertices = board.vertices;
+	const edges = board.edges;
 
-  // Assuming function to check for nearby buildings within 2 edges
-  const nearbyBuildings = false; // Placeholder for actual logic
+	const [openVertexIds, openEdgeIds] = get_buildable(localPlayer.UserId, vertices, edges);
 
-  // Assuming function to check if connected to the player's road
-  const connectedToRoad = true; // Placeholder for actual logic
+	// Retrieve vertex and edge parts using serialized identifiers
+	const verticesFolder = Workspace.WaitForChild("vertices") as Folder;
+	const edgesFolder = Workspace.WaitForChild("edges") as Folder;
 
-  return !nearbyBuildings && connectedToRoad;
+	openVertexIds.forEach((vertexId) => {
+		const vertexPart = verticesFolder.FindFirstChild(vertexId) as Part;
+		const highlight = vertexPart?.FindFirstChildOfClass("Highlight");
+		if (highlight) {
+			highlight.Enabled = status;
+		} else {
+			error("Highlight not found on vertex part: " + vertexId);
+		}
+	});
+
+	openEdgeIds.forEach((edgeId) => {
+		const edgePart = edgesFolder.FindFirstChild(edgeId) as Part;
+		const highlight = edgePart?.FindFirstChildOfClass("Highlight");
+		if (highlight) {
+			highlight.Enabled = status;
+		} else {
+			error("Highlight not found on edge part: " + edgeId);
+		}
+	});
 }
 
-// Helper function to check if an edge is buildable
-function is_edge_buildable(edge: Edge, playerId: number): boolean {
-  // Check if there's a road and it belongs to the player
-  return edge.road !== undefined && edge.road.ownerId === playerId;
+function get_buildable(playerId: number, vertices: ArrayT<Vertex>, edges: ArrayT<Edge>): [string[], string[]] {
+	const openVertexIds: string[] = [];
+	const openEdgeIds: string[] = [];
+
+	// Find buildable vertices
+	Object.keys(vertices).forEach((vertexId) => {
+		const vertex = vertices[vertexId];
+		if (vertex && is_buildable_vertex(vertex, vertices, edges)) {
+			openVertexIds.push(serialize_vertex(vertex));
+		}
+	});
+
+	// Find buildable edges
+	Object.keys(edges).forEach((edgeId) => {
+		const edge = edges[edgeId];
+		if (edge && is_buildable_edge(edge, playerId, edges)) {
+			openEdgeIds.push(serialize_edge(edge));
+		}
+	});
+
+	return [openVertexIds, openEdgeIds];
 }
 
-// Function to update visibility of ClickDetectors based on buildability
-function update_buildable_nodes() {
-  const playerId = Players.LocalPlayer.UserId;
-  const verticesFolder = Workspace.WaitForChild("vertices") as Folder;
-  const edgesFolder = Workspace.WaitForChild("edges") as Folder;
+function is_buildable_vertex(vertex: Vertex, vertices: ArrayT<Vertex>, edges: ArrayT<Edge>): boolean {
+	// Check if the vertex has a building
+	if (vertex.building) {
+		return false;
+	}
 
-  // Update vertices
-  verticesFolder.GetChildren().forEach((vertexPart) => {
-    const vertex = local_store.getState().board.vertices[vertexPart.Name];
-    if (vertex && vertexPart.IsA("Part")) {
-      const clickDetector = vertexPart.FindFirstChildOfClass("ClickDetector");
-      if (clickDetector) {
-        clickDetector.MaxActivationDistance = is_vertex_buildable(vertex, playerId) ? 32 : 0;
-      }
-    }
-  });
+	// Get the edges connected to the vertex
+	const connectedEdges = Object.values(edges).filter((edge) =>
+		edge.vertices.some((vec) => is_vector3_equal(vec, vertex.position)),
+	);
 
-  // Update edges
-  edgesFolder.GetChildren().forEach((edgePart) => {
-    const edge = local_store.getState().board.edges[edgePart.Name];
-    if (edge && edgePart.IsA("Part")) {
-      const clickDetector = edgePart.FindFirstChildOfClass("ClickDetector");
-      if (clickDetector) {
-        clickDetector.MaxActivationDistance = is_edge_buildable(edge, playerId) ? 32 : 0;
-      }
-    }
-  });
+	// Check if all connected edges have no buildings on their other vertices
+	return connectedEdges.every((edge) =>
+		edge.vertices.every(
+			(vec) =>
+				!is_vector3_equal(vec, vertex.position) &&
+				!Object.values(vertices).some((v) => is_vector3_equal(v.position, vec) && !!v.building),
+		),
+	);
 }
 
-// Call this function at appropriate game events, such as when a player's turn starts or a building is constructed
-update_buildable_nodes();
+function is_buildable_edge(edge: Edge, playerId: number, edges: ArrayT<Edge>): boolean {
+	// Check if the edge already has a road owned by the player
+	if (edge.road && edge.road.ownerId === playerId) {
+		return true;
+	}
+
+	// Check if any of the edge's vertices are connected to a road owned by the player
+	return edge.vertices.some((vec) =>
+		Object.values(edges).some(
+			(e) => e.road && e.road.ownerId === playerId && e.vertices.some((v) => is_vector3_equal(v, vec)),
+		),
+	);
+}
