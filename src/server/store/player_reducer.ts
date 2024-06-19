@@ -1,7 +1,7 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
 import { MyActions } from "shared/actions";
-import { DevCard, Resource, Road, Settlement, City, Edge, ArrayT } from "shared/types";
-import { deserialize_userid, remote_update_client } from "shared/utils";
+import { DevCard, Resource, Road, Settlement, City, ArrayT } from "shared/types";
+import { deserializeUserId } from "shared/utils";
 
 export interface PlayerState {
 	teamColor: string;
@@ -19,9 +19,9 @@ export interface PlayerState {
 
 const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 
-export function players_reducer(state: ArrayT<PlayerState> = {}, action: MyActions<PlayerState>): ArrayT<PlayerState> {
+export function playerReducer(state: ArrayT<PlayerState> = {}, action: MyActions<PlayerState>): ArrayT<PlayerState> {
 	if (action.target === "player") {
-		const localPlayer = Players.GetPlayerByUserId(deserialize_userid(action.id));
+		const localPlayer = Players.GetPlayerByUserId(deserializeUserId(action.id));
 		switch (action.type) {
 			case "CREATE":
 				if (localPlayer) remoteEvent.FireClient(localPlayer, action);

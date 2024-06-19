@@ -1,18 +1,18 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { Edge, Vertex, ArrayT, Hex, Resource, DevCard } from "./types";
+import { Edge, Vertex, ArrayT, Hex } from "./types";
 import Object from "@rbxts/object-utils";
 import { MyActions } from "./actions";
 
-export function serialize_userid(userId: number): string {
+export function serializeUserId(userId: number): string {
 	return `player:${userId}`;
 }
 
-export function deserialize_userid(userId: string): number {
+export function deserializeUserId(userId: string): number {
 	const parts = userId.split(":");
 	return tonumber(parts[1], 10) as number;
 }
 
-export function serialize_vertex(vertex: Vertex): string {
+export function serializeVertex(vertex: Vertex): string {
 	const vector = vertex.position;
 	const x = tostring(math.round(vector.X * 100) / 100);
 	const y = tostring(math.round(vector.Y * 100) / 100);
@@ -20,7 +20,7 @@ export function serialize_vertex(vertex: Vertex): string {
 	return `vertex:(${x}:${y}:${z})`;
 }
 
-export function serialize_hex(hex: Hex): string {
+export function serializeHex(hex: Hex): string {
 	const vector = hex.position;
 	const resource = hex.resource;
 	const x = tostring(math.round(vector.X * 100) / 100);
@@ -37,7 +37,7 @@ export function serialize_hex(hex: Hex): string {
 	return `hex:(${x}:${y}:${z}:${biome}:${hex.token})`;
 }
 
-export function serialize_edge(edge: Edge): string {
+export function serializeEdge(edge: Edge): string {
 	const pos = edge.cframe.Position;
 	const x = tostring(math.round(pos.X * 100) / 100);
 	const y = tostring(math.round(pos.Y * 100) / 100);
@@ -46,19 +46,19 @@ export function serialize_edge(edge: Edge): string {
 	return `edge:(${x},${y},${z})`;
 }
 
-export function is_edge(obj: Edge | Vertex): obj is Edge {
+export function isEdge(obj: Edge | Vertex): obj is Edge {
 	return "vertices" in obj;
 }
 
-export function is_vertex(obj: Edge | Vertex): obj is Vertex {
+export function isVertex(obj: Edge | Vertex): obj is Vertex {
 	return "edges" in obj;
 }
 
-export function is_vector3_equal(v1: Vector3, v2: Vector3, tolerance: number = 1e-4): boolean {
+export function isVector3Equal(v1: Vector3, v2: Vector3, tolerance: number = 1e-4): boolean {
 	return math.abs(v1.X - v2.X) < tolerance && math.abs(v1.Y - v2.Y) < tolerance && math.abs(v1.Z - v2.Z) < tolerance;
 }
 
-export function vector_to_string(v: Vector3): string {
+export function vectorToString(v: Vector3): string {
 	return `${v.X}:${v.Y}:${v.Z}`;
 }
 
@@ -73,18 +73,18 @@ export function someT<T>(data: ArrayT<T>, predicate: (value: T) => boolean): boo
 	});
 }
 
-export function remote_update_client<T>(action: MyActions<T>) {
+export function remoteUpdateClient<T>(action: MyActions<T>) {
 	const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 	remoteEvent.FireAllClients(action);
 }
 
-export function add_to_hand<T extends Record<string, number>>(data: T, key: keyof T, count: number): T {
+export function addToHand<T extends Record<string, number>>(data: T, key: keyof T, count: number): T {
 	const newData = { ...data };
 	(newData[key] as number) += count;
 	return newData;
 }
 
-export function multiply_payload<T extends Record<string, number>>(data: T, multiplier: number): T {
+export function multiplyPayload<T extends Record<string, number>>(data: T, multiplier: number): T {
 	const result: Partial<T> = {};
 
 	for (const [key, value] of Object.entries(data)) {
@@ -93,14 +93,14 @@ export function multiply_payload<T extends Record<string, number>>(data: T, mult
 	return result as T;
 }
 
-export function merge_hand<T extends Record<string, number>>(data: T, payload: T): T {
+export function mergeHand<T extends Record<string, number>>(data: T, payload: T): T {
 	const newData = { ...data };
 	for (const [key, amount] of Object.entries(payload)) {
-		add_to_hand(newData, key as keyof T, amount as number);
+		addToHand(newData, key as keyof T, amount as number);
 	}
 	return newData;
 }
-export function create_folder(name: string, parent: Instance): Folder {
+export function createFolder(name: string, parent: Instance): Folder {
 	const folder = new Instance("Folder");
 	folder.Parent = parent;
 	folder.Name = name;

@@ -1,14 +1,14 @@
-import { board_reducer } from "./board_reducer";
-import { deck_reducer } from "./deck_reducer";
-import { game_reducer } from "./game_reducer";
-import { players_reducer } from "./players_reducer";
 import { Store, combineReducers } from "@rbxts/rodux";
+import { playerReducer } from "./player_reducer";
+import { gameReducer } from "./game_reducer";
+import { deckReducer } from "./deck_reducer";
+import { boardReducer } from "./board_reducer";
 
 const root_reducer = combineReducers({
-	board: board_reducer,
-	players: players_reducer,
-	deck: deck_reducer,
-	game: game_reducer,
+	board: boardReducer,
+	players: playerReducer,
+	deck: deckReducer,
+	game: gameReducer,
 });
 
 export const store = new Store(root_reducer);

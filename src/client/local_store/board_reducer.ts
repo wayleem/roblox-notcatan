@@ -2,7 +2,7 @@ import { combineReducers } from "@rbxts/rodux";
 import { MyActions } from "shared/actions";
 import { ArrayT, Edge, Hex, Vertex } from "shared/types";
 
-function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): ArrayT<Vertex> {
+function vertexReducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): ArrayT<Vertex> {
 	if (action.target === "vertex")
 		switch (action.type) {
 			case "CREATE":
@@ -49,7 +49,7 @@ function vertex_reducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): 
 	return state;
 }
 
-function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT<Edge> {
+function edgeReducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT<Edge> {
 	if (action.target === "edge")
 		switch (action.type) {
 			case "CREATE":
@@ -94,7 +94,7 @@ function edge_reducer(state: ArrayT<Edge> = {}, action: MyActions<Edge>): ArrayT
 	return state;
 }
 
-function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<Hex> {
+function hexReducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<Hex> {
 	if (action.target === "hex")
 		switch (action.type) {
 			case "CREATE":
@@ -139,8 +139,8 @@ function hex_reducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<He
 	return state;
 }
 
-export const board_reducer = combineReducers({
-	vertices: vertex_reducer,
-	edges: edge_reducer,
-	hexes: hex_reducer,
+export const boardReducer = combineReducers({
+	vertices: vertexReducer,
+	edges: edgeReducer,
+	hexes: hexReducer,
 });

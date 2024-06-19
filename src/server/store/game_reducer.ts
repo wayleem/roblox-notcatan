@@ -1,7 +1,5 @@
 import { MyActions } from "shared/actions";
 import { ReplicatedStorage, Players } from "@rbxts/services";
-import { store } from ".";
-import Object from "@rbxts/object-utils";
 
 const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 
@@ -15,7 +13,7 @@ export const initGameState: GameState = {
 	turn: "",
 };
 
-export function game_reducer(state: GameState = initGameState, action: MyActions<GameState>): GameState {
+export function gameReducer(state: GameState = initGameState, action: MyActions<GameState>): GameState {
 	if (action.target === "game") {
 		let newState = state;
 
