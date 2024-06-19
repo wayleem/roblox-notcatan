@@ -1,7 +1,7 @@
 import Roact from "@rbxts/roact";
 import { ReplicatedStorage } from "@rbxts/services";
 
-export default function end_turn_button(): Roact.Element {
+export default function endTurnButton(): Roact.Element {
 	const handleClick = () => {
 		const endTurnEvent = ReplicatedStorage.WaitForChild("EndTurnEvent") as RemoteEvent;
 		endTurnEvent.FireServer();

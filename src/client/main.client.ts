@@ -1,10 +1,10 @@
-import { Players, ReplicatedStorage, StarterGui, Workspace } from "@rbxts/services";
+import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Object from "@rbxts/object-utils";
 import { makeHello } from "shared/module";
 import { localStore } from "./local_store";
 import { MyActions } from "shared/actions";
 import Roact from "@rbxts/roact";
-import end_turn_button from "./ui/end_turn_button";
+import endTurnButton from "./ui/end_turn_button";
 
 const serverToClientEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 serverToClientEvent.OnClientEvent.Connect((action: MyActions<any>) => {
@@ -48,4 +48,4 @@ const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 const screenGui = playerGui.WaitForChild("ScreenGui") as ScreenGui;
 
 // Mount the EndTurnButton component
-Roact.mount(end_turn_button(), screenGui);
+Roact.mount(endTurnButton(), screenGui);

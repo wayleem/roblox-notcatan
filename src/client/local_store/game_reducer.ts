@@ -1,4 +1,3 @@
-import { Players } from "@rbxts/services";
 import { MyActions } from "shared/actions";
 
 export interface GameState {
