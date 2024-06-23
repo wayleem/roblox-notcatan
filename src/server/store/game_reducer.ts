@@ -10,7 +10,6 @@ export function gameReducer(state: GameState = initGameState, action: MyActions<
 		switch (action.type) {
 			case "MERGE":
 				newState = { ...state, ...(action.data as Partial<GameState>) };
-				remoteEvent.FireAllClients(action);
 				break;
 
 			case "UPDATE_KEY":
@@ -24,27 +23,9 @@ export function gameReducer(state: GameState = initGameState, action: MyActions<
 
 			case "DEL":
 				newState = { ...initGameState };
-				remoteEvent.FireAllClients(action);
 				break;
 
 			case "PING":
-				// Check if the ID is a string before converting it to a number
-				if (typeIs(action.id, "string")) {
-					const numericId = tonumber(action.id);
-					if (numericId !== undefined) {
-						// Ensure conversion was successful
-						const localPlayer = Players.GetPlayerByUserId(numericId);
-						if (localPlayer) {
-							remoteEvent.FireClient(localPlayer, action);
-						}
-					} else {
-						// Handle cases where the id could not be converted to a number
-						error(`Invalid user ID provided: ${action.id}`);
-					}
-				} else {
-					// Handle cases where id might not be provided or is not a string
-					error("User ID is undefined or not a string");
-				}
 				return state;
 
 			default:

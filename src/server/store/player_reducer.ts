@@ -5,16 +5,13 @@ const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as Remot
 
 export function playerReducer(state: ArrayT<PlayerState> = {}, action: MyActions<PlayerState>): ArrayT<PlayerState> {
 	if (action.target === "player") {
-		const localPlayer = Players.GetPlayerByUserId(deserializeUserId(action.id));
 		switch (action.type) {
 			case "CREATE":
-				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				return {
 					...state,
 					[action.id]: action.data,
 				};
 			case "MERGE":
-				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				const currentPlayerState = state[action.id];
 				if (currentPlayerState) {
 					return {
@@ -27,7 +24,6 @@ export function playerReducer(state: ArrayT<PlayerState> = {}, action: MyActions
 				}
 				return state;
 			case "UPDATE_KEY":
-				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				const playerToUpdate = state[action.id];
 				if (playerToUpdate && action.key in playerToUpdate) {
 					return {
@@ -40,12 +36,10 @@ export function playerReducer(state: ArrayT<PlayerState> = {}, action: MyActions
 				}
 				return state;
 			case "DEL":
-				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				const newState = { ...state };
 				delete newState[action.id];
 				return newState;
 			case "PING":
-				if (localPlayer) remoteEvent.FireClient(localPlayer, action);
 				return state;
 		}
 	}

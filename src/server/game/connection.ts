@@ -27,9 +27,11 @@ Players.PlayerRemoving.Connect((player) => {
 function onPlayerJoin(player: Player) {
 	const playerId = serializeUserId(player.UserId);
 
+	/*
 	clients.FireClient(player, flush(playerId, store.getState().board.vertices, "vertex"));
 	clients.FireClient(player, flush(playerId, store.getState().board.edges, "edges"));
 	clients.FireClient(player, flush(playerId, store.getState().board.hexes, "hexes"));
+  */
 
 	store.dispatch(create<PlayerState>(playerId, initPlayerState, "player"));
 }

@@ -1,8 +1,7 @@
-import { ReplicatedStorage } from "@rbxts/services";
 import { store } from "./store";
-import { update } from "shared/actions";
-import { server } from "./events";
+import { clients, server } from "./events";
 import { parseEventPayload } from "shared/utils";
+import Object from "@rbxts/object-utils";
 
 server.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
 	const payload = parseEventPayload(args);
@@ -14,6 +13,9 @@ server.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
 		print("Data received: ", data);
 		switch (event) {
 			case "END_TURN":
+				break;
+			case "GET_PLAYERS":
+				clients.FireClient(player, { event, data: Object.keys(store.getState().players) });
 				break;
 		}
 	} else {
