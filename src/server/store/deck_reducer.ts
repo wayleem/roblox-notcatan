@@ -1,20 +1,6 @@
-import { MyActions } from "shared/actions";
-import { DevCard, Resource } from "shared/types";
+import { initDeckState } from "shared/store";
 
-export interface DeckState {
-	resources: Resource;
-	devCards: DevCard;
-}
-
-const initResources: Resource = { wheat: 0, sheep: 0, ore: 0, wood: 0, brick: 0 };
-const initDevCards: DevCard = { knight: 0, year_of_plenty: 0, monopoly: 0, road_building: 0, point: 0 };
-
-const initDeck: DeckState = {
-	resources: { ...initResources },
-	devCards: { ...initDevCards },
-};
-
-export function deckReducer(state: DeckState = initDeck, action: MyActions<DeckState>): DeckState {
+export function deckReducer(state: DeckState = initDeckState, action: MyActions<DeckState>): DeckState {
 	if (action.target === "deck") {
 		switch (action.type) {
 			case "CREATE":

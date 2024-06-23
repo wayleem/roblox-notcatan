@@ -1,7 +1,5 @@
 import { combineReducers } from "@rbxts/rodux";
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { MyActions } from "shared/actions";
-import { ArrayT, Edge, Hex, Vertex } from "shared/types";
 import { deserializeUserId } from "shared/utils";
 
 const updateClientEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
@@ -113,13 +111,11 @@ function hexReducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<Hex
 	if (action.target === "hex")
 		switch (action.type) {
 			case "CREATE":
-				updateClientEvent.FireAllClients(action);
 				return {
 					...state,
 					[action.id]: action.data,
 				};
 			case "MERGE":
-				updateClientEvent.FireAllClients(action);
 				const currentState = state[action.id];
 				if (currentState) {
 					return {
@@ -132,7 +128,6 @@ function hexReducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<Hex
 				}
 				return state;
 			case "UPDATE_KEY":
-				updateClientEvent.FireAllClients(action);
 				const keyToUpdate = state[action.id];
 				if (keyToUpdate && action.key in keyToUpdate) {
 					return {
@@ -145,7 +140,6 @@ function hexReducer(state: ArrayT<Hex> = {}, action: MyActions<Hex>): ArrayT<Hex
 				}
 				return state;
 			case "DEL":
-				updateClientEvent.FireAllClients(action);
 				const newState = { ...state };
 				delete newState[action.id];
 				return newState;

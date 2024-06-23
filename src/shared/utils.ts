@@ -1,7 +1,5 @@
 import { ReplicatedStorage } from "@rbxts/services";
-import { Edge, Vertex, ArrayT, Hex } from "./types";
 import Object from "@rbxts/object-utils";
-import { MyActions } from "./actions";
 
 export function serializeUserId(userId: number): string {
 	return `player:${userId}`;
@@ -115,4 +113,28 @@ export function shuffle<T>(array: T[]): T[] {
 		array[j] = temp;
 	}
 	return array;
+}
+
+export function parseEventPayload(args: unknown[]): EventPayload | undefined {
+	if (args.size() > 0) {
+		const payload = args[0];
+		if (type(payload) === "table") {
+			const payloadObj = payload as { [key: string]: unknown };
+
+			const event = payloadObj["event"];
+			const data = payloadObj["data"];
+
+			if (typeIs(event, "string")) {
+				if (data === undefined) {
+					return { event: event as string };
+				} else if (type(data) === "table") {
+					return { event: event as string, data: data as unknown[] };
+				} else {
+					// Handle case where data is not a table
+					return { event: event as string, data: [data] };
+				}
+			}
+		}
+	}
+	return undefined;
 }

@@ -4,9 +4,8 @@ import Object from "@rbxts/object-utils";
 import { makeHello } from "shared/module";
 import { update } from "shared/actions";
 import { serializeUserId, addToHand } from "shared/utils";
-import "./events";
+import "./remote";
 import "./game/connection";
-import { PlayerState } from "./store/player_reducer";
 import generateBoard from "./game/generate_board";
 
 // dispatch board update

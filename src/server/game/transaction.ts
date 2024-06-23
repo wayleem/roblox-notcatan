@@ -1,10 +1,7 @@
 import { update } from "shared/actions";
 import { store } from "server/store";
-import { Hex } from "shared/types";
-import { DeckState } from "server/store/deck_reducer";
 import Object from "@rbxts/object-utils";
 import { DEV_CARD_COST } from "shared/static";
-import { PlayerState } from "server/store/player_reducer";
 import { mergeHand, multiplyPayload, serializeUserId } from "shared/utils";
 
 export function tapResource(hex: Hex) {

@@ -1,6 +1,4 @@
 import { combineReducers } from "@rbxts/rodux";
-import { MyActions } from "shared/actions";
-import { ArrayT, Edge, Hex, Vertex } from "shared/types";
 
 function vertexReducer(state: ArrayT<Vertex> = {}, action: MyActions<Vertex>): ArrayT<Vertex> {
 	if (action.target === "vertex")

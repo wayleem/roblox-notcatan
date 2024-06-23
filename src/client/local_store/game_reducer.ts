@@ -1,12 +1,4 @@
-import { MyActions } from "shared/actions";
-
-export interface GameState {
-	round: number;
-}
-
-export const initGameState: GameState = {
-	round: 0,
-};
+import { initGameState } from "shared/store";
 
 export function gameReducer(state: GameState = initGameState, action: MyActions<GameState>): GameState {
 	if (action.target === "game") {

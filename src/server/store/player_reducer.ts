@@ -1,21 +1,5 @@
 import { Players, ReplicatedStorage } from "@rbxts/services";
-import { MyActions } from "shared/actions";
-import { DevCard, Resource, Road, Settlement, City, ArrayT } from "shared/types";
 import { deserializeUserId } from "shared/utils";
-
-export interface PlayerState {
-	teamColor: string;
-
-	resources: Resource;
-	devCards: DevCard;
-
-	roads: Road[];
-	settlements: Settlement[];
-	cities: City[];
-
-	numPlayedKnights: number;
-	numVictoryPoints: number;
-}
 
 const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 

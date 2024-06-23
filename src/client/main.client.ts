@@ -2,7 +2,6 @@ import { Players, ReplicatedStorage, Workspace } from "@rbxts/services";
 import Object from "@rbxts/object-utils";
 import { makeHello } from "shared/module";
 import { localStore } from "./local_store";
-import { MyActions } from "shared/actions";
 import Roact from "@rbxts/roact";
 import endTurnButton from "./ui/end_turn_button";
 

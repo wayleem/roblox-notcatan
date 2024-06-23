@@ -1,5 +1,4 @@
 import { Players, Workspace } from "@rbxts/services";
-import { Vertex, Edge, ArrayT } from "shared/types";
 import { localStore } from "../local_store";
 import Object from "@rbxts/object-utils";
 import { isVector3Equal, serializeEdge, serializeVertex } from "shared/utils";

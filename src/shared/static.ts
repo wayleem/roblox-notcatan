@@ -1,4 +1,3 @@
-import { Resource } from "./types";
 import { shuffle } from "./utils";
 
 export const PART_THICKNESS: number = 1;
