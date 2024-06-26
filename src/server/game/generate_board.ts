@@ -1,9 +1,9 @@
 import { ServerStorage, Workspace } from "@rbxts/services";
-import { create } from "shared/actions";
 import { store } from "server/store";
 import Object from "@rbxts/object-utils";
 import { GET_BOARD_RESOURCES, PART_THICKNESS, VERTEX_SIZE, GET_BOARD_TOKENS } from "shared/static";
-import { createFolder, isVector3Equal, serializeEdge, serializeHex, serializeVertex, someT } from "shared/utils";
+import { createFolder, isVector3Equal, serializeEdge, serializeHex, serializeVertex } from "shared/utils";
+import { create } from "server/store/actions";
 
 export default function generateBoard(radius: number, tileSize: number): void {
 	const resources = GET_BOARD_RESOURCES();
@@ -20,14 +20,14 @@ export default function generateBoard(radius: number, tileSize: number): void {
 			resourceIndex++;
 		}
 	}
-	const board = store.getState().board;
+	const board = store.getState().entities.board;
 	generateParts(board.vertices, board.edges, board.hexes);
 }
 
 function createHexagon(q: number, r: number, tileSize: number, resource: Resource, token: number): void {
-	const board = store.getState().board;
-	const vertices: ArrayT<Vertex> = board.vertices;
-	const edges: ArrayT<Edge> = board.edges;
+	const board = store.getState().entities.board;
+	const vertices: Record<string, Vertex> = board.vertices;
+	const edges: Record<string, Edge> = board.edges;
 
 	const center = hexToWorld(q, r, tileSize);
 	const hexEdges: Edge[] = [];
@@ -47,26 +47,38 @@ function createHexagon(q: number, r: number, tileSize: number, resource: Resourc
 			center.Z + tileSize * math.sin(nextAngle),
 		);
 
-		const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
-
-		if (!someT(edges, (e) => isVector3Equal(e.cframe.Position, edgeCFrame.Position))) {
-			const edge: Edge = { cframe: edgeCFrame, vertices: [vertexVector, nextVertexVector] };
-			hexEdges.push(edge);
-			store.dispatch(create<Edge>(serializeEdge(edge), edge, "edge"));
+		let vertex = Object.values(vertices).find((v) => isVector3Equal(v.position, vertexVector));
+		if (!vertex) {
+			vertex = { position: vertexVector };
+			const id = serializeVertex(vertex);
+			hexVertices.push(vertex);
+			create<Vertex>(id, vertex, "vertex");
 		}
 
-		if (!someT(vertices, (v) => isVector3Equal(v.position, vertexVector))) {
-			const vertex: Vertex = { position: vertexVector };
-			hexVertices.push(vertex);
-			store.dispatch(create<Vertex>(serializeVertex(vertex), vertex, "vertex"));
+		let nextVertex = Object.values(vertices).find((v) => isVector3Equal(v.position, nextVertexVector));
+		if (!nextVertex) {
+			nextVertex = { position: nextVertexVector };
+			const id = serializeVertex(nextVertex);
+			hexVertices.push(nextVertex);
+			create<Vertex>(id, nextVertex, "vertex");
+		}
+
+		const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
+
+		if (!Object.values(edges).find((e) => isVector3Equal(e.cframe.Position, edgeCFrame.Position))) {
+			const edge: Edge = { cframe: edgeCFrame, vertices: [vertex, nextVertex] };
+			const id = serializeEdge(edge);
+			hexEdges.push(edge);
+			create<Edge>(id, edge, "edge");
 		}
 	}
 
 	const hex: Hex = { position: center, vertices: hexVertices, edges: hexEdges, resource, token };
-	store.dispatch(create<Hex>(serializeHex(hex), hex, "hex"));
+	const id = serializeHex(hex);
+	create<Hex>(id, hex, "hex");
 }
 
-function generateParts(vertices: ArrayT<Vertex>, edges: ArrayT<Edge>, hexes: ArrayT<Hex>) {
+function generateParts(vertices: Record<string, Vertex>, edges: Record<string, Edge>, hexes: Record<string, Hex>) {
 	createFolder("vertices", Workspace);
 	createFolder("edges", Workspace);
 	createFolder("hexes", Workspace);
@@ -109,7 +121,7 @@ function createEdgePart(edge: Edge): Part {
 	const edgeFolder = Workspace.WaitForChild("edges") as Folder;
 
 	edgePart.Name = serializeEdge(edge);
-	edgePart.Size = new Vector3(PART_THICKNESS, PART_THICKNESS, v1_vector.sub(v2_vector).Magnitude);
+	edgePart.Size = new Vector3(PART_THICKNESS, PART_THICKNESS, v1_vector.position.sub(v2_vector.position).Magnitude);
 	edgePart.CFrame = edge.cframe;
 	edgePart.Anchored = true;
 

@@ -60,17 +60,6 @@ export function vectorToString(v: Vector3): string {
 	return `${v.X}:${v.Y}:${v.Z}`;
 }
 
-export function someT<T>(data: ArrayT<T>, predicate: (value: T) => boolean): boolean {
-	const values = Object.values(data);
-
-	return values.some((value) => {
-		if (value !== undefined) {
-			return predicate(value);
-		}
-		return false;
-	});
-}
-
 export function remoteUpdateClient<T>(action: MyActions<T>) {
 	const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
 	remoteEvent.FireAllClients(action);

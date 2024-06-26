@@ -15,7 +15,7 @@ server.OnServerEvent.Connect((player: Player, ...args: unknown[]) => {
 			case "END_TURN":
 				break;
 			case "GET_PLAYERS":
-				clients.FireClient(player, { event, data: Object.keys(store.getState().players) });
+				clients.FireClient(player, { event, data: Object.keys(store.getState().entities.players) });
 				break;
 		}
 	} else {

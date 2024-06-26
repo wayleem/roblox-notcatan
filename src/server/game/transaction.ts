@@ -1,13 +1,13 @@
-import { update } from "shared/actions";
 import { store } from "server/store";
 import Object from "@rbxts/object-utils";
 import { DEV_CARD_COST } from "shared/static";
 import { mergeHand, multiplyPayload, serializeUserId } from "shared/utils";
+import { update } from "server/store/actions";
 
 export function tapResource(hex: Hex) {
 	hex.vertices.forEach((v) => {
 		if (v.building) {
-			const player = store.getState().players[v.building.ownerId];
+			const player = store.getState().entities.players[v.building.ownerId];
 			if (player) {
 				const resources = { ...player.resources };
 				const multiplier = v.building.points;
@@ -21,13 +21,11 @@ export function tapResource(hex: Hex) {
         store.dispatch(update<DeckState>("", "resources", merge_hand(resources, remove), "deck"))
         */
 
-				store.dispatch(
-					update<PlayerState>(
-						serializeUserId(v.building.ownerId),
-						"resources",
-						mergeHand(resources, tap),
-						"player",
-					),
+				update<PlayerState>(
+					serializeUserId(v.building.ownerId),
+					"resources",
+					mergeHand(resources, tap),
+					"player",
 				);
 			}
 		}
@@ -36,8 +34,8 @@ export function tapResource(hex: Hex) {
 
 export function draw_devcard(player: Player) {
 	const playerId = serializeUserId(player.UserId);
-	const playerData = store.getState().players[playerId];
-	const deck = store.getState().deck;
+	const playerData = store.getState().entities.players[playerId];
+	const deck = store.getState().singletons.deck;
 
 	if (!playerData) return;
 
@@ -60,31 +58,27 @@ export function draw_devcard(player: Player) {
 	const [selectedCard] = availableCards[randomIndex];
 
 	// Update the deck to remove one instance of the drawn card
-	store.dispatch(
-		update<DeckState>(
-			"",
-			"devCards",
-			{
-				[selectedCard]: deck.devCards[selectedCard] - 1,
-			},
-			"deck",
-		),
+	update<DeckState>(
+		"",
+		"devCards",
+		{
+			[selectedCard]: deck.devCards[selectedCard] - 1,
+		},
+		"deck",
 	);
 
 	// Update the player's state to add the drawn card and subtract the resources
 	const updatedResources = mergeHand({ ...playerData.resources }, DEV_CARD_COST);
 
-	store.dispatch(update<PlayerState>(playerId, "resources", updatedResources, "player"));
-	store.dispatch(
-		update<PlayerState>(
-			playerId,
-			"devCards",
-			{
-				...playerData.devCards,
-				[selectedCard]: (playerData.devCards[selectedCard] || 0) + 1,
-			},
-			"player",
-		),
+	update<PlayerState>(playerId, "resources", updatedResources, "player");
+	update<PlayerState>(
+		playerId,
+		"devCards",
+		{
+			...playerData.devCards,
+			[selectedCard]: (playerData.devCards[selectedCard] || 0) + 1,
+		},
+		"player",
 	);
 
 	print(`Player drew a ${selectedCard} card.`);
