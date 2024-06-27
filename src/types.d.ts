@@ -19,50 +19,9 @@ type Resource = {
 	brick: number;
 };
 
-interface RootState {
-	entities: {
-		players: Record<string, PlayerState>;
-		board: {
-			vertices: Record<string, Vertex>;
-			edges: Record<string, Edge>;
-			hexes: Record<string, Hex>;
-		};
-	};
-	singletons: {
-		game: GameState;
-		deck: DeckState;
-	};
-}
+type ResourceType = "wheat" | "sheep" | "ore" | "wood" | "brick";
 
-interface PlayerState {
-	teamColor: string;
-
-	resources: Resource;
-	devCards: DevCard;
-
-	roads: Road[];
-	settlements: Settlement[];
-	cities: City[];
-
-	numPlayedKnights: number;
-	numVictoryPoints: number;
-}
-
-interface GameState {
-	round: number;
-	turn: string | number;
-}
-
-interface DeckState {
-	resources: Resource;
-	devCards: DevCard;
-}
-
-interface BoardState {
-	vertices: Record<string, Vertex>;
-	edges: Record<string, Edge>;
-	hexes: Record<string, Hex>;
-}
+type DevCardType = "knight" | "year_of_plenty" | "monopoly" | "road_building" | "point";
 
 interface Building {
 	ownerId: number;
@@ -102,10 +61,9 @@ interface Hex {
 	token: number;
 }
 
+// actions
 type Action_Create<T> = { id: string; data: T; type: "CREATE"; target: string };
-// big data swap
 type Action_Merge<T> = { id: string; data: Partial<T>; type: "MERGE"; target: string };
-// change one key
 type Action_Update<T> = {
 	id: string;
 	key: keyof T;
@@ -113,9 +71,59 @@ type Action_Update<T> = {
 	type: "UPDATE_KEY";
 	target: string;
 };
-// delete
 type Action_Del = { id: string; type: "DEL"; target: string };
-// force update clients
 type Action_Flush<T> = { id: string; state: Record<string, T>; type: "PING"; target: string };
-
 type MyActions<T> = Action_Create<T> | Action_Merge<T> | Action_Update<T> | Action_Del | Action_Flush<T>;
+
+// states
+interface BoardState {
+	vertices: Record<string, Vertex>;
+	edges: Record<string, Edge>;
+	hexes: Record<string, Hex>;
+}
+
+interface PublicPlayerState {
+	id: string;
+	name: string;
+	color: string;
+	roadCount: number;
+	settlementCount: number;
+	cityCount: number;
+	resourceCount: number; // Just the total, not individual resources
+	devCardCount: number; // Just the total, not individual cards
+	knightsPlayed: number;
+	longestRoad: boolean;
+	largestArmy: boolean;
+}
+
+interface PrivatePlayerState extends PublicPlayerState {
+	resources: Resource;
+	devCards: DevCard;
+	victoryPoints: number;
+}
+
+interface GameState {
+	currentTurn: string; // Player ID
+	diceRoll: number;
+	gamePhase: string; // e.g., "SETUP", "MAIN", "TRADE", etc.
+}
+
+interface DeckState {
+	resources: Resource;
+	devCards: DevCard;
+}
+
+// Client-only state
+interface ClientState {
+	localPlayerId: string;
+}
+// Server state
+interface ServerState {
+	vertices: Record<string, Vertex>;
+	edges: Record<string, Edge>;
+	hexes: Record<string, Hex>;
+	players: Record<string, PrivatePlayerState>;
+	game: Record<"game", GameState>;
+	resourceDeck: Record<ResourceType, number>;
+	devCardDeck: Record<DevCardType, number>;
+}
