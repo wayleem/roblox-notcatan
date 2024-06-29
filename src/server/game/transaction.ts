@@ -1,3 +1,5 @@
+/*
+
 import { store } from "server/store";
 import Object from "@rbxts/object-utils";
 import { DEV_CARD_COST } from "shared/static";
@@ -13,13 +15,13 @@ export function tapResource(hex: Hex) {
 				const multiplier = v.building.points;
 				const tap = multiplyPayload(hex.resource, multiplier);
 
-				/* add finite # of cards later
+				/ add finite # of cards later
         const remove = multiply_payload(tap, -1)
 
         if (merge_hand())
 
         store.dispatch(update<DeckState>("", "resources", merge_hand(resources, remove), "deck"))
-        */
+        /
 
 				update<PlayerState>(
 					serializeUserId(v.building.ownerId),
@@ -83,3 +85,4 @@ export function draw_devcard(player: Player) {
 
 	print(`Player drew a ${selectedCard} card.`);
 }
+*/

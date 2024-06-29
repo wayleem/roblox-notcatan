@@ -1,3 +1,4 @@
+/*
 import { ServerStorage, Workspace } from "@rbxts/services";
 import { serverStore } from "server/store";
 import Object from "@rbxts/object-utils";
@@ -159,3 +160,4 @@ function createVertexPart(vertex: Vertex): Part {
 
 	return vertexPart;
 }
+*/
