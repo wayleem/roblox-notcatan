@@ -45,7 +45,9 @@ export function runServerTests() {
 			...serverStore.getState().game,
 			currentTurn: playerId,
 			diceRoll: [math.random(1, 6), math.random(1, 6)],
+			gamePhase: "main",
 		});
+		print(`Server processed START_TURN for player: ${playerId}`);
 	});
 
 	serverStore.registerHandler<{ resource: ResourceType; amount: number }>("COLLECT_RESOURCE", (player, payload) => {
@@ -118,7 +120,6 @@ export function runServerTests() {
 
 	print("PLAYER UPDATE SUCCESS");
 
-	/*
 	// Test 3: Roll dice and update game state
 	print("Test 3: Roll dice and update game state");
 	serverStore["handleEvent"]({ Name: playerId } as Player, {
@@ -136,9 +137,9 @@ export function runServerTests() {
 		updatedGameState.diceRoll[1] >= 1 && updatedGameState.diceRoll[1] <= 6,
 		"Second die roll should be between 1 and 6",
 	);
+	assert(updatedGameState.gamePhase === "main", "Game phase should be updated to 'main'");
 
 	print("GAME UPDATE SUCCESS");
-  */
 
 	// Test 4: Add a hex to the board
 	print("Test 4: Add a hex to the board");
@@ -197,5 +198,6 @@ export function runServerTests() {
 
 	print("ROAD CREATE SUCCESS");
 
+	print("Server is ready to receive START_TURN from client");
 	print("All server tests completed successfully");
 }
