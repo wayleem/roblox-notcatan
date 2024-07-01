@@ -26,23 +26,26 @@ interface City extends Building {
 	points: 2;
 }
 
-interface Vertex {
+interface Hex {
 	position: Vector3;
-	building?: Settlement | City; // Optional building
+	vertices: Vertex[];
+	edges: Edge[];
+	resource: Record<ResourceType, number>;
+	token: number;
+	part?: Part;
 }
 
 interface Edge {
 	cframe: CFrame;
 	vertices: [Vertex, Vertex];
-	road?: Road; // Optional road
+	road?: Road;
+	part?: Part;
 }
 
-interface Hex {
-	position: Vector3; // Center position
-	vertices: Vertex[];
-	edges: Edge[];
-	resource: Record<ResourceType, number>;
-	token: number;
+interface Vertex {
+	position: Vector3;
+	building?: Settlement | City;
+	part?: Part;
 }
 
 // Shared state interface

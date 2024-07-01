@@ -1,3 +1,4 @@
+/*
 import Roact from "@rbxts/roact";
 import { useEffect, useState, withHooks } from "@rbxts/roact-hooked";
 import { client, server } from "client/remote";
@@ -41,3 +42,4 @@ const PlayerList: Roact.FunctionComponent = () => {
 };
 
 export default withHooks(PlayerList);
+*/

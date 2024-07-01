@@ -1,12 +1,14 @@
-/*
 import { ServerStorage, Workspace } from "@rbxts/services";
-import { serverStore } from "server/store";
+import { ServerStore } from "shared/store";
 import Object from "@rbxts/object-utils";
-import { GET_BOARD_RESOURCES, PART_THICKNESS, VERTEX_SIZE, GET_BOARD_TOKENS } from "shared/static";
+import { PART_THICKNESS, VERTEX_SIZE, GET_BOARD_RESOURCES, GET_BOARD_TOKENS, INITIAL_RESOURCES } from "shared/static";
 import { createFolder, isVector3Equal, serializeEdge, serializeHex, serializeVertex } from "shared/utils";
-import { create, merge } from "server/store/actions";
 
-export default function generateBoard(radius: number, tileSize: number): void {
+export default function generateBoard(
+	serverStore: ServerStore<SharedState, ServerState>,
+	radius: number,
+	tileSize: number,
+): void {
 	const resources = GET_BOARD_RESOURCES();
 	const tokens = GET_BOARD_TOKENS();
 	let resourceIndex = 0;
@@ -17,15 +19,22 @@ export default function generateBoard(radius: number, tileSize: number): void {
 		for (let r = r1; r <= r2; r++) {
 			const resource = resources[resourceIndex % resources.size()];
 			const token = tokens[resourceIndex % tokens.size()];
-			createHexagon(q, r, tileSize, resource, token);
+			createHexagon(serverStore, q, r, tileSize, resource, token);
 			resourceIndex++;
 		}
 	}
 	const board = serverStore.getState().board;
-	generateParts(board.vertices, board.edges, board.hexes);
+	generateParts(serverStore, board.vertices, board.edges, board.hexes);
 }
 
-function createHexagon(q: number, r: number, tileSize: number, resource: Resource, token: number): void {
+function createHexagon(
+	serverStore: ServerStore<SharedState, ServerState>,
+	q: number,
+	r: number,
+	tileSize: number,
+	resource: ResourceType,
+	token: number,
+): void {
 	const board = serverStore.getState().board;
 	const vertices: Record<string, Vertex> = board.vertices;
 	const edges: Record<string, Edge> = board.edges;
@@ -53,7 +62,10 @@ function createHexagon(q: number, r: number, tileSize: number, resource: Resourc
 			vertex = { position: vertexVector };
 			const id = serializeVertex(vertex);
 			hexVertices.push(vertex);
-			serverStore.dispatch(create(id, vertex, "board.vertices"));
+			serverStore.update("board", {
+				...serverStore.getState().board,
+				vertices: { ...serverStore.getState().board.vertices, [id]: vertex },
+			});
 		}
 
 		let nextVertex = Object.values(vertices).find((v) => isVector3Equal(v.position, nextVertexVector));
@@ -61,7 +73,10 @@ function createHexagon(q: number, r: number, tileSize: number, resource: Resourc
 			nextVertex = { position: nextVertexVector };
 			const id = serializeVertex(nextVertex);
 			hexVertices.push(nextVertex);
-			serverStore.dispatch(create<Vertex>(id, nextVertex, "vertex"));
+			serverStore.update("board", {
+				...serverStore.getState().board,
+				vertices: { ...serverStore.getState().board.vertices, [id]: nextVertex },
+			});
 		}
 
 		const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
@@ -70,28 +85,45 @@ function createHexagon(q: number, r: number, tileSize: number, resource: Resourc
 			const edge: Edge = { cframe: edgeCFrame, vertices: [vertex, nextVertex] };
 			const id = serializeEdge(edge);
 			hexEdges.push(edge);
-			serverStore.dispatch(create<Edge>(id, edge, "edge"));
+			serverStore.update("board", {
+				...serverStore.getState().board,
+				edges: { ...serverStore.getState().board.edges, [id]: edge },
+			});
 		}
 	}
 
-	const hex: Hex = { position: center, vertices: hexVertices, edges: hexEdges, resource, token };
+	const hex: Hex = {
+		position: center,
+		vertices: hexVertices,
+		edges: hexEdges,
+		resource: { ...INITIAL_RESOURCES, [resource]: 1 },
+		token,
+	};
 	const id = serializeHex(hex);
-	serverStore.dispatch(create<Hex>(id, hex, "hex"));
+	serverStore.update("board", {
+		...serverStore.getState().board,
+		hexes: { ...serverStore.getState().board.hexes, [id]: hex },
+	});
 }
 
-function generateParts(vertices: Record<string, Vertex>, edges: Record<string, Edge>, hexes: Record<string, Hex>) {
+function generateParts(
+	serverStore: ServerStore<SharedState, ServerState>,
+	vertices: Record<string, Vertex>,
+	edges: Record<string, Edge>,
+	hexes: Record<string, Hex>,
+) {
 	createFolder("vertices", Workspace);
 	createFolder("edges", Workspace);
 	createFolder("hexes", Workspace);
 
 	Object.values(vertices).forEach((v) => {
-		createVertexPart(v);
+		createVertexPart(serverStore, v);
 	});
 	Object.values(edges).forEach((e) => {
-		createEdgePart(e);
+		createEdgePart(serverStore, e);
 	});
 	Object.values(hexes).forEach((h) => {
-		createHexPart(h);
+		createHexPart(serverStore, h);
 	});
 }
 
@@ -101,7 +133,7 @@ function hexToWorld(q: number, r: number, tileSize: number): Vector3 {
 	return new Vector3(x, 0, z);
 }
 
-function createHexPart(hex: Hex) {
+function createHexPart(serverStore: ServerStore<SharedState, ServerState>, hex: Hex) {
 	const hexPart = ServerStorage.WaitForChild("Tile").Clone() as Part;
 	const hexFolder = Workspace.WaitForChild("hexes") as Folder;
 
@@ -109,12 +141,19 @@ function createHexPart(hex: Hex) {
 	hexPart.Parent = hexFolder;
 	hexPart.Position = hex.position;
 
-	serverStore.dispatch(merge<Hex>(serializeHex(hex), { part: hexPart }, "hex"));
+	const id = serializeHex(hex);
+	serverStore.update("board", {
+		...serverStore.getState().board,
+		hexes: {
+			...serverStore.getState().board.hexes,
+			[id]: { ...serverStore.getState().board.hexes[id], part: hexPart },
+		},
+	});
 
 	return hexPart;
 }
 
-function createEdgePart(edge: Edge): Part {
+function createEdgePart(serverStore: ServerStore<SharedState, ServerState>, edge: Edge): Part {
 	const v1_vector = edge.vertices[0].position;
 	const v2_vector = edge.vertices[1].position;
 	const edgePart = new Instance("Part");
@@ -133,12 +172,19 @@ function createEdgePart(edge: Edge): Part {
 	highlight.Parent = edgePart;
 	clickDetector.Parent = edgePart;
 
-	serverStore.dispatch(merge<Edge>(serializeEdge(edge), { part: edgePart }, "edge"));
+	const id = serializeEdge(edge);
+	serverStore.update("board", {
+		...serverStore.getState().board,
+		edges: {
+			...serverStore.getState().board.edges,
+			[id]: { ...serverStore.getState().board.edges[id], part: edgePart },
+		},
+	});
 
 	return edgePart;
 }
 
-function createVertexPart(vertex: Vertex): Part {
+function createVertexPart(serverStore: ServerStore<SharedState, ServerState>, vertex: Vertex): Part {
 	const vertexPart = new Instance("Part");
 	const highlight = new Instance("Highlight");
 	const clickDetector = new Instance("ClickDetector");
@@ -156,8 +202,14 @@ function createVertexPart(vertex: Vertex): Part {
 	highlight.Parent = vertexPart;
 	clickDetector.Parent = vertexPart;
 
-	serverStore.dispatch(merge<Vertex>(serializeVertex(vertex), { part: vertexPart }, "vertex"));
+	const id = serializeVertex(vertex);
+	serverStore.update("board", {
+		...serverStore.getState().board,
+		vertices: {
+			...serverStore.getState().board.vertices,
+			[id]: { ...serverStore.getState().board.vertices[id], part: vertexPart },
+		},
+	});
 
 	return vertexPart;
 }
-*/

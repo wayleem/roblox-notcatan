@@ -1,3 +1,4 @@
+/*
 import { Players } from "@rbxts/services";
 import PlayerList from "./player_list";
 import Roact from "@rbxts/roact";
@@ -10,3 +11,4 @@ Roact.mount(
 	</screengui>,
 	playerGui,
 );
+*/

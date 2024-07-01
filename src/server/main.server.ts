@@ -1,8 +1,10 @@
 import { makeHello } from "shared/module";
 import { runServerTests } from "./test";
+import generateBoard from "./game/generate_board";
+import { store } from "./store";
 
-runServerTests();
-
+// Generate the game board
+generateBoard(store, 3, 10); // radius: 3, tileSize: 10
 /*
 // dispatch board update
 generateBoard(2, 10);
