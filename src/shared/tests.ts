@@ -1,5 +1,6 @@
 /*import { ReplicatedStorage } from "@rbxts/services";
-import { ServerStore } from "shared/store";
+import { ClientStore, ServerStore } from "shared/store";
+import { serializeUserId } from "./utils";
 
 export function runServerTests() {
 	print("Starting Catan Server Store Tests");
@@ -38,9 +39,9 @@ export function runServerTests() {
 	const serverStore = new ServerStore(initialSharedState, remoteEvent, initialServerState);
 
 	// Register handlers
-	serverStore.registerHandler<{ playerId: string }>("START_TURN", (player, payload) => {
+	serverStore.registerHandler("START_TURN", (player) => {
 		if (!player) return;
-		const playerId = payload.data.playerId;
+		const playerId = serializeUserId(player.UserId);
 		serverStore.update("game", {
 			...serverStore.getState().game,
 			currentTurn: playerId,
@@ -50,10 +51,11 @@ export function runServerTests() {
 		print(`Server processed START_TURN for player: ${playerId}`);
 	});
 
-	serverStore.registerHandler<{ resource: ResourceType; amount: number }>("COLLECT_RESOURCE", (player, payload) => {
+	serverStore.registerHandler("COLLECT_RESOURCE", (player) => {
 		if (!player) return;
-		const { resource, amount } = payload.data;
-		const playerId = player.Name;
+		const resource = "wood";
+		const amount = 2;
+		const playerId = serializeUserId(player.UserId);
 		const playerState = serverStore.getState().players[playerId];
 		if (playerState) {
 			serverStore.update("players", {
@@ -109,10 +111,8 @@ export function runServerTests() {
 
 	// Test 2: Update player resources
 	print("Test 2: Update player resources");
-	serverStore["handleEvent"]({ Name: playerId } as Player, {
-		event: "COLLECT_RESOURCE",
-		data: { resource: "wheat", amount: 2 },
-	});
+
+	wait(3);
 
 	const updatedPlayer = serverStore.getState().players[playerId];
 	assert(updatedPlayer.totalResources === 2, "Total resources should be updated to 2");
@@ -122,10 +122,8 @@ export function runServerTests() {
 
 	// Test 3: Roll dice and update game state
 	print("Test 3: Roll dice and update game state");
-	serverStore["handleEvent"]({ Name: playerId } as Player, {
-		event: "START_TURN",
-		data: { playerId: playerId },
-	});
+
+	wait(3);
 
 	const updatedGameState = serverStore.getState().game;
 	assert(updatedGameState.currentTurn === playerId, "Current turn should be updated to player1");
@@ -200,5 +198,73 @@ export function runServerTests() {
 
 	print("Server is ready to receive START_TURN from client");
 	print("All server tests completed successfully");
+}
+
+export function runClientTests() {
+	print("Starting Simplified Catan Client Store Tests");
+
+	// Initialize client store
+	const remoteEvent = ReplicatedStorage.FindFirstChild("CatanRemoteEvent") as RemoteEvent;
+	if (!remoteEvent) {
+		error("RemoteEvent not found in ReplicatedStorage");
+	}
+
+	const initialSharedState: SharedState = {
+		players: {},
+		game: {
+			currentTurn: "",
+			diceRoll: [0, 0],
+			gamePhase: "setup",
+			longestRoadOwner: "",
+			largestArmyOwner: "",
+			robberHex: "",
+		},
+		board: { hexes: {}, vertices: {}, edges: {} },
+		buildings: { roads: {}, settlements: {}, cities: {} },
+	};
+
+	const clientStore = new ClientStore(initialSharedState, remoteEvent);
+
+	// Test: Send START_TURN action to server and verify state update
+	print("Test: Send START_TURN action to server");
+
+	const playerId = "player1";
+	clientStore.sendToServer("START_TURN", { playerId });
+	print(`START_TURN action sent for player: ${playerId}`);
+
+	// Simulate waiting for server response
+	task.wait(1);
+
+	// Check if the state was updated correctly
+	const updatedGameState = clientStore.getState().game;
+	let testsPassed = true;
+
+	if (updatedGameState.currentTurn !== playerId) {
+		print(`FAIL: Current turn not updated. Expected ${playerId}, got ${updatedGameState.currentTurn}`);
+		testsPassed = false;
+	}
+
+	if (updatedGameState.gamePhase !== "main") {
+		print(`FAIL: Game phase not updated. Expected "main", got ${updatedGameState.gamePhase}`);
+		testsPassed = false;
+	}
+
+	if (
+		updatedGameState.diceRoll[0] < 1 ||
+		updatedGameState.diceRoll[0] > 6 ||
+		updatedGameState.diceRoll[1] < 1 ||
+		updatedGameState.diceRoll[1] > 6
+	) {
+		print(
+			`FAIL: Dice roll not within expected range. Got ${updatedGameState.diceRoll[0]} and ${updatedGameState.diceRoll[1]}`,
+		);
+		testsPassed = false;
+	}
+
+	if (testsPassed) {
+		print("PASS: Client test for START_TURN action succeeded");
+	}
+
+	print("All client tests completed successfully");
 }
 */

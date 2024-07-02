@@ -1,10 +1,36 @@
 import { makeHello } from "shared/module";
-import { runServerTests } from "./test";
 import generateBoard from "./game/generate_board";
 import { store } from "./store";
+import "./game/connection";
+import { serializeUserId } from "shared/utils";
 
-// Generate the game board
-generateBoard(store, 3, 10); // radius: 3, tileSize: 10
+store.registerHandler("COLLECT_RESOURCE", (player) => {
+	if (!player) return;
+	const resource = "wood";
+	const amount = 2;
+	const playerId = serializeUserId(player.UserId);
+	const playerState = store.getState().players[playerId];
+	if (playerState) {
+		store.update("players", {
+			...store.getState().players,
+			[playerId]: {
+				...playerState,
+				totalResources: playerState.totalResources + amount,
+				resources: {
+					...playerState.resources,
+					[resource]: (playerState.resources[resource] || 0) + amount,
+				},
+			},
+		});
+	}
+});
+
+print(store.getState().players);
+
+wait(5);
+
+print(store.getState().players);
+
 /*
 // dispatch board update
 generateBoard(2, 10);

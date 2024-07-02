@@ -42,19 +42,11 @@ class BaseStore<A extends SharedState, B, AB = A & B> {
 		this.handlers.set(event, fn as (player: Player | undefined, payload: any) => void);
 	}
 
-	protected broadcast(event: string, data: unknown) {
+	private broadcast(event: string, data: unknown) {
 		if (game.GetService("RunService").IsServer()) {
 			this.remoteEvent.FireAllClients({ event, data } as Payload);
 		} else {
 			warn("Attempted to broadcast from client-side store");
-		}
-	}
-
-	protected sendToServer<T = unknown>(event: string, data: T) {
-		if (game.GetService("RunService").IsClient()) {
-			this.remoteEvent.FireServer({ event, data } as Payload<T>);
-		} else {
-			warn("Attempted to send to server from server-side store");
 		}
 	}
 
@@ -64,23 +56,36 @@ class BaseStore<A extends SharedState, B, AB = A & B> {
 
 	update<K extends keyof AB>(key: K, value: AB[K]) {
 		this.state[key] = value;
-		this.broadcast("stateUpdate", { key, value });
+		this.broadcast("UPDATE", { key, value });
 	}
 
 	create(data: Partial<AB>) {
 		this.state = { ...this.state, ...data } as AB;
-		this.broadcast("stateCreate", data);
+		this.broadcast("CREATE", data);
 	}
 
 	delete<K extends keyof AB>(key: K) {
 		delete this.state[key];
-		this.broadcast("stateDelete", key);
+		this.broadcast("DELETE", key);
 	}
 }
 
 export class ServerStore<A extends SharedState, B extends ServerState> extends BaseStore<A, B> {
 	constructor(initialSharedState: A, remoteEvent: RemoteEvent, serverState: B) {
 		super(initialSharedState, remoteEvent, serverState);
+
+		this.registerHandler<void>("NEW_CLIENT", (player) => {
+			if (player) {
+				this.flushClient(player);
+			}
+		});
+	}
+
+	flushClient(player: Player) {
+		this.remoteEvent.FireClient(player, {
+			event: "FLUSH",
+			data: this.getState(),
+		} as Payload);
 	}
 }
 
@@ -88,18 +93,32 @@ export class ClientStore<A extends SharedState> extends BaseStore<A, {}> {
 	constructor(initialSharedState: A, remoteEvent: RemoteEvent) {
 		super(initialSharedState, remoteEvent);
 
-		// Set up handlers for state updates from server
-		this.registerHandler<{ key: keyof A; value: any }>("stateUpdate", (_, payload) => {
+		this.registerHandler<{ key: keyof A; value: any }>("UPDATE", (_, payload) => {
 			const { key, value } = payload.data;
 			this.state[key] = value;
 		});
 
-		this.registerHandler<Partial<A>>("stateCreate", (_, payload) => {
+		this.registerHandler<Partial<A>>("CREATE", (_, payload) => {
 			this.state = { ...this.state, ...payload.data } as A;
 		});
 
-		this.registerHandler<keyof A>("stateDelete", (_, payload) => {
+		this.registerHandler<keyof A>("DELETE", (_, payload) => {
 			delete this.state[payload.data];
 		});
+
+		this.registerHandler<A>("FLUSH", (_, payload) => {
+			this.state = payload.data;
+			print("State fully synchronized with server");
+		});
+
+		this.requestState();
+	}
+
+	sendToServer<T = unknown>(event: string, data: T) {
+		this.remoteEvent.FireServer({ event, data } as Payload<T>);
+	}
+
+	private requestState() {
+		this.sendToServer("NEW_CLIENT", undefined);
 	}
 }
