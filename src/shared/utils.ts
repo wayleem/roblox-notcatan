@@ -60,11 +60,6 @@ export function vectorToString(v: Vector3): string {
 	return `${v.X}:${v.Y}:${v.Z}`;
 }
 
-export function remoteUpdateClient<T>(action: MyActions<T>) {
-	const remoteEvent = ReplicatedStorage.WaitForChild("UpdateClientEvent") as RemoteEvent;
-	remoteEvent.FireAllClients(action);
-}
-
 export function addToHand<T extends Record<string, number>>(data: T, key: keyof T, count: number): T {
 	const newData = { ...data };
 	(newData[key] as number) += count;
@@ -102,28 +97,4 @@ export function shuffle<T>(array: T[]): T[] {
 		array[j] = temp;
 	}
 	return array;
-}
-
-export function parseEventPayload(args: unknown[]): EventPayload | undefined {
-	if (args.size() > 0) {
-		const payload = args[0];
-		if (type(payload) === "table") {
-			const payloadObj = payload as { [key: string]: unknown };
-
-			const event = payloadObj["event"];
-			const data = payloadObj["data"];
-
-			if (typeIs(event, "string")) {
-				if (data === undefined) {
-					return { event: event as string };
-				} else if (type(data) === "table") {
-					return { event: event as string, data: data as unknown[] };
-				} else {
-					// Handle case where data is not a table
-					return { event: event as string, data: [data] };
-				}
-			}
-		}
-	}
-	return undefined;
 }

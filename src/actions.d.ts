@@ -1,12 +1,21 @@
-// actions
-type Action_Create<T> = { id: string; data: T; type: "CREATE" };
-type Action_Merge<T> = { id: string; data: Partial<T>; type: "MERGE" };
-type Action_Update<T> = {
-	id: string;
-	key: keyof T;
-	value: unknown;
-	type: "UPDATE_KEY";
-};
-type Action_Del = { id: string; type: "DEL" };
-type Action_Flush<T> = { id: string; state: Record<string, T>; type: "PING" };
-type MyActions<T> = Action_Create<T> | Action_Merge<T> | Action_Update<T> | Action_Del | Action_Flush<T>;
+import { Action } from "@reduxjs/toolkit";
+
+// Define action types
+declare global {
+	interface UpdateAction<T> extends Action<"UPDATE"> {
+		key: keyof T;
+		value: T[keyof T];
+	}
+
+	interface CreateAction<T> extends Action<"CREATE"> {
+		data: Partial<T>;
+	}
+
+	interface DeleteAction<T> extends Action<"DELETE"> {
+		key: keyof T;
+	}
+
+	type StoreAction<T> = UpdateAction<T> | CreateAction<T> | DeleteAction<T>;
+}
+
+export {};
