@@ -1,9 +1,7 @@
 import { makeHello } from "shared/module";
-import generateBoard from "./game/generate_board";
-import { store } from "./store";
 import "./game/connection";
-import testCollectResource from "./tests/testCollectResource";
+import testBoard from "./tests/testBoard";
 
-testCollectResource();
+testBoard();
 
 print(makeHello("main.server.ts"));

@@ -7,7 +7,7 @@ export default function testBoard() {
 	print(store.getState().board);
 
 	// Generate the game board
-	generateBoard(store, 3, 10); // radius: 3, tileSize: 10
+	generateBoard(3, 10); // radius: 3, tileSize: 10
 
 	wait(2);
 

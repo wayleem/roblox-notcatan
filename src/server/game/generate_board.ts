@@ -1,14 +1,20 @@
-import { ServerStorage, Workspace } from "@rbxts/services";
-import { ServerStore } from "shared/store";
 import Object from "@rbxts/object-utils";
+import { ServerStorage, Workspace } from "@rbxts/services";
+import { store } from "server/store";
 import { PART_THICKNESS, VERTEX_SIZE, GET_BOARD_RESOURCES, GET_BOARD_TOKENS, INITIAL_RESOURCES } from "shared/static";
 import { createFolder, isVector3Equal, serializeEdge, serializeHex, serializeVertex } from "shared/utils";
 
-export default function generateBoard(
-	serverStore: ServerStore<SharedState, ServerState>,
-	radius: number,
-	tileSize: number,
-): void {
+export default function generateBoard(radius: number, tileSize: number): void {
+	print("Starting board generation");
+
+	// Temporarily disable automatic broadcasting
+
+	const newBoard = {
+		hexes: {} as Record<string, Hex>,
+		vertices: {} as Record<string, Vertex>,
+		edges: {} as Record<string, Edge>,
+	};
+
 	const resources = GET_BOARD_RESOURCES();
 	const tokens = GET_BOARD_TOKENS();
 	let resourceIndex = 0;
@@ -19,26 +25,47 @@ export default function generateBoard(
 		for (let r = r1; r <= r2; r++) {
 			const resource = resources[resourceIndex % resources.size()];
 			const token = tokens[resourceIndex % tokens.size()];
-			createHexagon(serverStore, q, r, tileSize, resource, token);
+			createHexagon(newBoard, q, r, tileSize, resource, token);
 			resourceIndex++;
 		}
 	}
-	const board = serverStore.getState().board;
-	generateParts(serverStore, board.vertices, board.edges, board.hexes);
+
+	print("Finished creating hexagons");
+
+	// Generate all parts in memory without updating the store
+	createFolder("vertices", Workspace);
+	createFolder("edges", Workspace);
+	createFolder("hexes", Workspace);
+
+	Object.entries(newBoard.vertices).forEach(([id, vertex]) => {
+		newBoard.vertices[id] = { ...vertex, part: createVertexPart(vertex) };
+	});
+
+	Object.entries(newBoard.edges).forEach(([id, edge]) => {
+		newBoard.edges[id] = { ...edge, part: createEdgePart(edge) };
+	});
+
+	Object.entries(newBoard.hexes).forEach(([id, hex]) => {
+		newBoard.hexes[id] = { ...hex, part: createHexPart(hex) };
+	});
+
+	print("Finished creating parts");
+
+	store.update("board", newBoard);
+
+	print("Store updated with new board");
+
+	print("Board generation complete");
 }
 
 function createHexagon(
-	serverStore: ServerStore<SharedState, ServerState>,
+	newBoard: { hexes: Record<string, Hex>; vertices: Record<string, Vertex>; edges: Record<string, Edge> },
 	q: number,
 	r: number,
 	tileSize: number,
 	resource: ResourceType,
 	token: number,
 ): void {
-	const board = serverStore.getState().board;
-	const vertices: Record<string, Vertex> = board.vertices;
-	const edges: Record<string, Edge> = board.edges;
-
 	const center = hexToWorld(q, r, tileSize);
 	const hexEdges: Edge[] = [];
 	const hexVertices: Vertex[] = [];
@@ -57,38 +84,29 @@ function createHexagon(
 			center.Z + tileSize * math.sin(nextAngle),
 		);
 
-		let vertex = Object.values(vertices).find((v) => isVector3Equal(v.position, vertexVector));
+		let vertex = Object.values(newBoard.vertices).find((v) => isVector3Equal(v.position, vertexVector));
 		if (!vertex) {
 			vertex = { position: vertexVector };
 			const id = serializeVertex(vertex);
 			hexVertices.push(vertex);
-			serverStore.update("board", {
-				...serverStore.getState().board,
-				vertices: { ...serverStore.getState().board.vertices, [id]: vertex },
-			});
+			newBoard.vertices[id] = vertex;
 		}
 
-		let nextVertex = Object.values(vertices).find((v) => isVector3Equal(v.position, nextVertexVector));
+		let nextVertex = Object.values(newBoard.vertices).find((v) => isVector3Equal(v.position, nextVertexVector));
 		if (!nextVertex) {
 			nextVertex = { position: nextVertexVector };
 			const id = serializeVertex(nextVertex);
 			hexVertices.push(nextVertex);
-			serverStore.update("board", {
-				...serverStore.getState().board,
-				vertices: { ...serverStore.getState().board.vertices, [id]: nextVertex },
-			});
+			newBoard.vertices[id] = nextVertex;
 		}
 
 		const edgeCFrame = CFrame.lookAt(vertexVector.add(nextVertexVector).div(2), nextVertexVector);
 
-		if (!Object.values(edges).find((e) => isVector3Equal(e.cframe.Position, edgeCFrame.Position))) {
+		if (!Object.values(newBoard.edges).find((e) => isVector3Equal(e.cframe.Position, edgeCFrame.Position))) {
 			const edge: Edge = { cframe: edgeCFrame, vertices: [vertex, nextVertex] };
 			const id = serializeEdge(edge);
 			hexEdges.push(edge);
-			serverStore.update("board", {
-				...serverStore.getState().board,
-				edges: { ...serverStore.getState().board.edges, [id]: edge },
-			});
+			newBoard.edges[id] = edge;
 		}
 	}
 
@@ -100,31 +118,7 @@ function createHexagon(
 		token,
 	};
 	const id = serializeHex(hex);
-	serverStore.update("board", {
-		...serverStore.getState().board,
-		hexes: { ...serverStore.getState().board.hexes, [id]: hex },
-	});
-}
-
-function generateParts(
-	serverStore: ServerStore<SharedState, ServerState>,
-	vertices: Record<string, Vertex>,
-	edges: Record<string, Edge>,
-	hexes: Record<string, Hex>,
-) {
-	createFolder("vertices", Workspace);
-	createFolder("edges", Workspace);
-	createFolder("hexes", Workspace);
-
-	Object.values(vertices).forEach((v) => {
-		createVertexPart(serverStore, v);
-	});
-	Object.values(edges).forEach((e) => {
-		createEdgePart(serverStore, e);
-	});
-	Object.values(hexes).forEach((h) => {
-		createHexPart(serverStore, h);
-	});
+	newBoard.hexes[id] = hex;
 }
 
 function hexToWorld(q: number, r: number, tileSize: number): Vector3 {
@@ -133,7 +127,7 @@ function hexToWorld(q: number, r: number, tileSize: number): Vector3 {
 	return new Vector3(x, 0, z);
 }
 
-function createHexPart(serverStore: ServerStore<SharedState, ServerState>, hex: Hex) {
+function createHexPart(hex: Hex): Part {
 	const hexPart = ServerStorage.WaitForChild("Tile").Clone() as Part;
 	const hexFolder = Workspace.WaitForChild("hexes") as Folder;
 
@@ -141,19 +135,10 @@ function createHexPart(serverStore: ServerStore<SharedState, ServerState>, hex: 
 	hexPart.Parent = hexFolder;
 	hexPart.Position = hex.position;
 
-	const id = serializeHex(hex);
-	serverStore.update("board", {
-		...serverStore.getState().board,
-		hexes: {
-			...serverStore.getState().board.hexes,
-			[id]: { ...serverStore.getState().board.hexes[id], part: hexPart },
-		},
-	});
-
 	return hexPart;
 }
 
-function createEdgePart(serverStore: ServerStore<SharedState, ServerState>, edge: Edge): Part {
+function createEdgePart(edge: Edge): Part {
 	const v1_vector = edge.vertices[0].position;
 	const v2_vector = edge.vertices[1].position;
 	const edgePart = new Instance("Part");
@@ -172,19 +157,10 @@ function createEdgePart(serverStore: ServerStore<SharedState, ServerState>, edge
 	highlight.Parent = edgePart;
 	clickDetector.Parent = edgePart;
 
-	const id = serializeEdge(edge);
-	serverStore.update("board", {
-		...serverStore.getState().board,
-		edges: {
-			...serverStore.getState().board.edges,
-			[id]: { ...serverStore.getState().board.edges[id], part: edgePart },
-		},
-	});
-
 	return edgePart;
 }
 
-function createVertexPart(serverStore: ServerStore<SharedState, ServerState>, vertex: Vertex): Part {
+function createVertexPart(vertex: Vertex): Part {
 	const vertexPart = new Instance("Part");
 	const highlight = new Instance("Highlight");
 	const clickDetector = new Instance("ClickDetector");
@@ -201,15 +177,6 @@ function createVertexPart(serverStore: ServerStore<SharedState, ServerState>, ve
 	highlight.Enabled = false;
 	highlight.Parent = vertexPart;
 	clickDetector.Parent = vertexPart;
-
-	const id = serializeVertex(vertex);
-	serverStore.update("board", {
-		...serverStore.getState().board,
-		vertices: {
-			...serverStore.getState().board.vertices,
-			[id]: { ...serverStore.getState().board.vertices[id], part: vertexPart },
-		},
-	});
 
 	return vertexPart;
 }

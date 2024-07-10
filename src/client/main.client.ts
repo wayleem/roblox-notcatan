@@ -1,8 +1,6 @@
-import { Workspace } from "@rbxts/services";
 import { makeHello } from "shared/module";
-import { clientStore } from "./store";
-import testCollectResource from "./tests/testCollectResource";
+import testBoard from "./tests/testBoard";
 
-testCollectResource();
+testBoard();
 
 print(makeHello("main.client.ts"));
