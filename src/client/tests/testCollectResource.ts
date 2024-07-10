@@ -6,7 +6,7 @@ export default function testCollectResource() {
 	wait(3);
 
 	print(clientStore.getState().players);
-	clientStore.sendToServer("COLLECT_RESOURCE", serializeUserId(Players.LocalPlayer.UserId));
+	clientStore.remote("COLLECT_RESOURCE", serializeUserId(Players.LocalPlayer.UserId));
 
 	wait(3);
 

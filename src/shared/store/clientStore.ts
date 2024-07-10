@@ -3,9 +3,9 @@ import BaseStore from "./baseStore";
 export class ClientStore<A extends SharedState> extends BaseStore<A, {}> {
 	constructor(initialSharedState: A, remoteEvent: RemoteEvent) {
 		super(initialSharedState, remoteEvent);
-		this.requestState();
+		this.remote("NEW_CLIENT");
 
-		this.registerHandler("STORE_ACTION", (_, payload) => {
+		this.registerHandler("BROADCAST", (_, payload) => {
 			if (typeIs(payload, "table") && "data" in payload) {
 				const action = payload.data as StoreAction<A>;
 				print("Received store action:", action);
@@ -20,12 +20,7 @@ export class ClientStore<A extends SharedState> extends BaseStore<A, {}> {
 		});
 	}
 
-	sendToServer<T>(event: string, data?: T) {
-		print(`Sending event to server: ${event}`, data);
+	remote<T>(event: string, data?: T) {
 		this.remoteEvent.FireServer({ event, data });
-	}
-
-	private requestState() {
-		this.sendToServer("NEW_CLIENT");
 	}
 }
