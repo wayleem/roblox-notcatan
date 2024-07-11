@@ -27,18 +27,18 @@ interface Hex {
 	edges: Edge[];
 	resource: Record<ResourceType, number>;
 	token: number;
-	part?: Part;
+	part: Part;
 }
 
 interface Edge {
 	cframe: CFrame;
 	vertices: [Vertex, Vertex];
 	road?: Road;
-	part?: Part;
+	part: Part;
 }
 
 interface Vertex {
 	position: Vector3;
 	building?: Settlement | City;
-	part?: Part;
+	part: Part;
 }
