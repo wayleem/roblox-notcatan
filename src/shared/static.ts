@@ -90,3 +90,32 @@ export const INITIAL_DEV_CARDS: Record<DevCardType, number> = {
 	road_building: 0,
 	point: 0,
 };
+
+export const INITIAL_SHAREDSTATE: SharedState = {
+	players: {},
+	game: {
+		turnOrder: [],
+		currentTurnIndex: 0,
+		isReversed: false,
+		diceRoll: [0, 0],
+		gamePhase: "setup",
+		turnPhase: "trade",
+		longestRoadOwner: "",
+		largestArmyOwner: "",
+		robberHex: "",
+	},
+	board: {
+		hexes: {},
+		vertices: {},
+		edges: {},
+	},
+	buildings: {
+		roads: {},
+		settlements: {},
+		cities: {},
+	},
+};
+
+export const INITIAL_SERVERSTATE: ServerState = {
+	players: {},
+};

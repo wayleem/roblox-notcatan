@@ -1,34 +1,12 @@
 import { ReplicatedStorage } from "@rbxts/services";
+import { INITIAL_SHAREDSTATE } from "shared/static";
 import { ClientStore } from "shared/store";
 
 // Get the remote event for client-server communication
 const remoteEvent = ReplicatedStorage.WaitForChild("CatanRemoteEvent") as RemoteEvent;
 
-// Define initial shared state
-const initialSharedState: SharedState = {
-	players: {},
-	game: {
-		currentTurn: "",
-		diceRoll: [0, 0],
-		gamePhase: "setup",
-		longestRoadOwner: "",
-		largestArmyOwner: "",
-		robberHex: "",
-	},
-	board: {
-		hexes: {},
-		vertices: {},
-		edges: {},
-	},
-	buildings: {
-		roads: {},
-		settlements: {},
-		cities: {},
-	},
-};
-
 // Create the ClientStore
-export const clientStore = new ClientStore<SharedState>(initialSharedState, remoteEvent);
+export const clientStore = new ClientStore<SharedState>(INITIAL_SHAREDSTATE, remoteEvent);
 
 print("Catan client initialized");
 

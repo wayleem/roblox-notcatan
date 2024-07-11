@@ -3,7 +3,7 @@ type ResourceType = "wheat" | "sheep" | "ore" | "wood" | "brick";
 type DevCardType = "knight" | "year_of_plenty" | "monopoly" | "road_building" | "point";
 
 interface Building {
-	ownerId: number;
+	ownerId: string;
 	part?: Part;
 }
 
