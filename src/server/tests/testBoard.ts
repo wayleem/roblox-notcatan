@@ -1,4 +1,4 @@
-import generateBoard from "server/game/generate_board";
+import generateBoard from "server/board/generateBoard";
 import { store } from "server/store";
 
 export default function testBoard() {

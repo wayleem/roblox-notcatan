@@ -3,6 +3,7 @@ import { clientStore } from "client/store";
 import { serializeUserId } from "shared/utils";
 
 export default function testGame() {
+	/*
 	wait(3);
 
 	print("game: " + clientStore.getState().game.currentTurn);
@@ -11,4 +12,5 @@ export default function testGame() {
 	wait(3);
 
 	print("game: " + clientStore.getState().game.currentTurn);
+  */
 }

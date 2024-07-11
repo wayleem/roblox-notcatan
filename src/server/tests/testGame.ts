@@ -2,6 +2,7 @@ import { store } from "server/store";
 import { serializeUserId } from "shared/utils";
 
 export default function testGame() {
+	/*
 	store.registerHandler("START_TURN", (player) => {
 		if (!player) return;
 		const playerId = serializeUserId(player.UserId);
@@ -19,4 +20,5 @@ export default function testGame() {
 	wait(5);
 
 	print("game: " + store.getState().game.currentTurn);
+  */
 }
