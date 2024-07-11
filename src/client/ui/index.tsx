@@ -1,14 +1,18 @@
-/*
 import { Players } from "@rbxts/services";
-import PlayerList from "./player_list";
 import Roact from "@rbxts/roact";
+import EndTurnButton from "./EndTurnButton";
+import GameDisplay from "./GameDisplay";
+import TurnOrderDisplay from "./TurnOrderDisplay";
+import DiceRoll from "./DiceRoll";
 
 const playerGui = Players.LocalPlayer.WaitForChild("PlayerGui") as PlayerGui;
 
 Roact.mount(
 	<screengui>
-		<PlayerList />
+		<GameDisplay />
+		<EndTurnButton />
+		<TurnOrderDisplay />
+		<DiceRoll />
 	</screengui>,
 	playerGui,
 );
-*/
