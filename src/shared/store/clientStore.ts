@@ -19,4 +19,7 @@ export class ClientStore<A extends SharedState> extends BaseStore<A, {}> {
 			}
 		});
 	}
+	remote<T>(event: string, data?: T) {
+		this.remoteEvent.FireServer({ event, data });
+	}
 }

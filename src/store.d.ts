@@ -3,7 +3,7 @@ interface Payload<T = unknown> {
 	data: T;
 }
 
-type HandlerFunction<AB> = (player: Player | undefined, payload: unknown) => void;
+type HandlerFunction = (player: Player | undefined, payload: unknown) => void;
 
 // Shared state interface
 interface SharedState {

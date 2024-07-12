@@ -6,7 +6,7 @@ import Object from "@rbxts/object-utils";
 export default class BaseStore<A extends SharedState, B, AB = A & B> {
 	protected store: Store<AB, StoreAction<AB>>;
 	protected remoteEvent: RemoteEvent;
-	private remoteHandlers = new Map<string, HandlerFunction<AB>>();
+	private remoteHandlers = new Map<string, HandlerFunction>();
 
 	constructor(initialSharedState: A, remoteEvent: RemoteEvent, serverState?: B) {
 		const initialState = serverState
@@ -27,14 +27,6 @@ export default class BaseStore<A extends SharedState, B, AB = A & B> {
 		}
 	}
 
-	private broadcast(action: StoreAction<A>) {
-		if (game.GetService("RunService").IsServer()) {
-			this.remoteEvent.FireAllClients({ event: "BROADCAST", data: this.store.getState() });
-		} else {
-			log.warn("Attempted to broadcast from client-side store");
-		}
-	}
-
 	private handleEvent(player: Player | undefined, data: unknown) {
 		if (typeIs(data, "table") && "event" in data && typeIs(data.event, "string")) {
 			const handler = this.remoteHandlers.get(data.event);
@@ -50,52 +42,20 @@ export default class BaseStore<A extends SharedState, B, AB = A & B> {
 		}
 	}
 
-	public remote<T>(event: string, data?: T, target?: Player) {
-		if (target) this.remoteEvent.FireClient(target, { event, data });
-		else this.remoteEvent.FireServer({ event, data });
-	}
-
-	public registerHandler(event: string, fn: HandlerFunction<AB>) {
+	registerHandler(event: string, fn: HandlerFunction) {
 		if (this.remoteHandlers.has(event)) {
 			log.warn(`Handler for event "${event}" is being overwritten.`);
 		}
 		this.remoteHandlers.set(event, fn);
 	}
 
-	public getState(): AB {
+	getState(): AB {
 		return this.store.getState();
 	}
 
 	public subscribe(listener: (state: AB) => void): () => void {
 		const connection = this.store.changed.connect(listener);
 		return () => connection.disconnect();
-	}
-
-	public update<K extends keyof AB>(key: K, value: AB[K]) {
-		const action: UpdateAction<AB> = { type: "UPDATE", key, value };
-		this.store.dispatch(action);
-		if (game.GetService("RunService").IsServer() && this.isSharedKey(key)) {
-			this.broadcast(action as unknown as StoreAction<A>);
-		}
-	}
-
-	public create(data: Partial<AB>) {
-		const action: CreateAction<AB> = { type: "CREATE", data };
-		this.store.dispatch(action);
-		if (game.GetService("RunService").IsServer()) {
-			const sharedData = this.filterSharedData(data);
-			if (Object.keys(sharedData).size() > 0) {
-				this.broadcast({ type: "CREATE", data: sharedData } as StoreAction<A>);
-			}
-		}
-	}
-
-	public delete<K extends keyof AB>(key: K) {
-		const action: DeleteAction<AB> = { type: "DELETE", key };
-		this.store.dispatch(action);
-		if (game.GetService("RunService").IsServer() && this.isSharedKey(key)) {
-			this.broadcast(action as unknown as StoreAction<A>);
-		}
 	}
 
 	private isSharedKey<K extends keyof AB>(key: K): key is K & keyof A {

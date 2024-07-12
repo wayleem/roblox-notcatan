@@ -15,7 +15,11 @@ declare global {
 		key: keyof T;
 	}
 
-	type StoreAction<T> = UpdateAction<T> | CreateAction<T> | DeleteAction<T>;
+	interface FlushAction<T> extends Action<"FLUSH"> {
+		data: T;
+	}
+
+	type StoreAction<T> = UpdateAction<T> | CreateAction<T> | DeleteAction<T> | FlushAction<T>;
 }
 
 export {};
