@@ -29,7 +29,7 @@ export default class BaseStore<A extends SharedState, B, AB = A & B> {
 
 	private broadcast(action: StoreAction<A>) {
 		if (game.GetService("RunService").IsServer()) {
-			this.remoteEvent.FireAllClients({ event: "BROADCAST", data: action });
+			this.remoteEvent.FireAllClients({ event: "BROADCAST", data: this.store.getState() });
 		} else {
 			log.warn("Attempted to broadcast from client-side store");
 		}
@@ -48,6 +48,11 @@ export default class BaseStore<A extends SharedState, B, AB = A & B> {
 		} else {
 			log.warn("Invalid event data received");
 		}
+	}
+
+	public remote<T>(event: string, data?: T, target?: Player) {
+		if (target) this.remoteEvent.FireClient(target, { event, data });
+		else this.remoteEvent.FireServer({ event, data });
 	}
 
 	public registerHandler(event: string, fn: HandlerFunction<AB>) {

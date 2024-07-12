@@ -6,12 +6,12 @@ export class ServerStore<A extends SharedState, B extends ServerState> extends B
 
 		this.registerHandler("NEW_CLIENT", (player) => {
 			if (player) {
-				this.flushClient(player);
+				this.flush(player);
 			}
 		});
 	}
 
-	flushClient(player: Player) {
+	flush(player: Player) {
 		const sharedState = this.getState() as A; // Only send shared state to client
 		this.remoteEvent.FireClient(player, { event: "FLUSH", data: sharedState });
 	}

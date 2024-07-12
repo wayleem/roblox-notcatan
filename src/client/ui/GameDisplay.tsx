@@ -1,7 +1,7 @@
 import Roact from "@rbxts/roact";
-import { withHooks } from "@rbxts/roact-hooked";
-import { clientStore } from "client/store";
 import { useStore } from "shared/store";
+import { clientStore } from "client/store";
+import { withHooks } from "@rbxts/roact-hooked";
 
 const GameDisplay: Roact.FunctionComponent = () => {
 	const gameState = useStore(clientStore, (state) => state.game);
@@ -9,12 +9,7 @@ const GameDisplay: Roact.FunctionComponent = () => {
 	const currentPlayer = gameState.turnOrder[gameState.currentTurnIndex];
 
 	return (
-		<frame
-			Key="GameStateDisplay"
-			Size={new UDim2(1, 0, 0, 50)}
-			Position={new UDim2(0, 0, 0, 0)}
-			BackgroundTransparency={1}
-		>
+		<frame Size={new UDim2(1, 0, 1, 0)} BackgroundTransparency={1}>
 			<uilistlayout
 				FillDirection={Enum.FillDirection.Horizontal}
 				HorizontalAlignment={Enum.HorizontalAlignment.Center}
@@ -22,37 +17,21 @@ const GameDisplay: Roact.FunctionComponent = () => {
 				Padding={new UDim(0, 20)}
 			/>
 			<textlabel
-				Key="CurrentTurn"
 				Text={`Current Turn: Player ${currentPlayer}`}
-				Size={new UDim2(0, 200, 1, 0)}
+				Size={new UDim2(0, 200, 0, 30)}
 				BackgroundTransparency={1}
 				TextColor3={Color3.fromRGB(255, 255, 255)}
 				TextSize={18}
 			/>
-			<textlabel
-				Key="GamePhase"
-				Text={`Game Phase: ${gameState.gamePhase}`}
-				Size={new UDim2(0, 200, 1, 0)}
-				BackgroundTransparency={1}
-				TextColor3={Color3.fromRGB(255, 255, 255)}
-				TextSize={18}
-			/>
-			<textlabel
-				Key="TurnPhase"
-				Text={`Turn Phase: ${gameState.turnPhase}`}
-				Size={new UDim2(0, 200, 1, 0)}
-				BackgroundTransparency={1}
-				TextColor3={Color3.fromRGB(255, 255, 255)}
-				TextSize={18}
-			/>
-			<textlabel
-				Key="TurnDirection"
-				Text={`Turn Direction: ${gameState.isReversed ? "Reversed" : "Normal"}`}
-				Size={new UDim2(0, 200, 1, 0)}
-				BackgroundTransparency={1}
-				TextColor3={Color3.fromRGB(255, 255, 255)}
-				TextSize={18}
-			/>
+			{gameState.gamePhase !== "setup" && (
+				<textlabel
+					Text={`Turn Phase: ${gameState.turnPhase}`}
+					Size={new UDim2(0, 200, 0, 30)}
+					BackgroundTransparency={1}
+					TextColor3={Color3.fromRGB(255, 255, 255)}
+					TextSize={18}
+				/>
+			)}
 		</frame>
 	);
 };

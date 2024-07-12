@@ -1,7 +1,8 @@
 import { makeHello } from "shared/module";
 import "./ui";
 import testBoard from "./tests/testBoard";
+import testCollectResource from "./tests/testCollectResource";
 
-testBoard();
+testCollectResource();
 
 print(makeHello("main.client.ts"));
